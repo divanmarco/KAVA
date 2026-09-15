@@ -1,2 +1,19 @@
-venv
+# Fichiers compilés et cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnements virtuels
+venv/
+env/
+.venv/
+
+# Configuration d'environnement et base de données
 .env
+*.db
+*.sqlite3
+instance/
+
+# Configuration des éditeurs de code
+.vscode/
+.idea/

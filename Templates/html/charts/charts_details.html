@@ -7,7 +7,9 @@
 {% block page_subtitle %}{{ nouveau_rapport.name }}{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary btn-sm" href="{{ url_for('edit_charts', id=nouveau_rapport.id_produit) }}">
+<a class="btn btn-secondary btn-sm" href="{{ url_for('edit_charts', id=nouveau_rapport.id_rapport) }}">
+    Éditer
+</a>
   <i class="bi bi-pencil"></i> Modifier
 </a>
 <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('charts') }}">

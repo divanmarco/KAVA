@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="adminHMD professional admin dashboard template">
+  <title>Users | adminHMD</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons/bootstrap-icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+</head>
+
+<body>
+  <div class="admin-shell">
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+    <form action="{{ url_for('index') }}" method="post"></form>
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
+      <div class="sidebar-header">
+        <a class="brand-mark" href="{{ url_for('index') }}" aria-label="CAVA dashboard">
+          <img class="img-cava" src="{{ url_for('static', filename='css/Murtazi.jpg') }}" alt="CAVA">
+          <span class="brand-copy">
+            <span class="brand-title"></span>
+          </span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+
+        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2"
+            viewBox="0 0 16 16">
+            <path
+              d="M6 1H1v14h5zm9 0h-5v5h5zm0 9v5h-5v-5zM0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 １-１-１z" />
+          </svg>
+          <span class="text-sidebar">Vue d'ensemble</span>
+        </a>
+        <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}" href="{{ url_for('users') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle"
+            viewBox="0 0 16 16">
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+            <path fill-rule="evenodd"
+              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.7571.225 5.468 2.37A7 7 0 0 0 8 1z" />
+          </svg>
+          <span>Utilisateurs</span>
+        </a>
+
+        <a class="nav-link {% if request.endpoint == 'product' %}active{% endif %}" href="{{ url_for('product') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart"
+            viewBox="0 0 16 16">
+            <path
+              d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+          </svg>
+          <span>Produits</span>
+        </a>
+
+        <a class="nav-link {% if request.endpoint == 'orders' %}active{% endif %}" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bag"
+            viewBox="0 0 16 16">
+            <path
+              d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+          </svg>
+          <span>Comandes</span>
+        </a>
+
+        <a class="nav-link {% if request.endpoint == 'customers' %}active{% endif %}" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill"
+            viewBox="0 0 16 16">
+            <path
+              d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1_0_0-5_2.5_2.5_0_0_0_0_5" />
+          </svg>
+          <span>Clients</span>
+        </a>
+
+        <a class="nav-link {% if request.endpoint == 'reports' %}active{% endif %}" href="{{ url_for('charts') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-clipboard2-data" viewBox="0 0 16 16">
+            <path
+              d="M9.5 0a.5.5 0 0 1 .5.5.5.5 0 0 0 .5.5.5.5 0 0 1 .5.5V2a.5.5 0 0 1-.5.5h-5A.5.5 0 0 1 5 2v-.5a.5.5 0 0 1 .5-.5.5.5 0 0 0 .5-.5.5.5 0 0 1 .5-.5z" />
+            <path
+              d="M3 2.5a.5.5 0 0 1 .5-.5H4a.5.5 0 0 0 0-1h-.5A1.5 1.5 0 0 0 2 2.5v12A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 12.5 1H12a.5.5 0 0 0 0 1h.5a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5z" />
+            <path
+              d="M10 7a1 1 0 1 1 2 0v5a1 1 0 1 1-2 0zm-6 4a1 1 0 1 1 2 0v1a1 1 0 1 1-2 0zm4-3a1 1 0 0 0-1 1v3a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1" />
+          </svg>
+          <span>Rapports & Bilans</span>
+        </a>
+
+        <a class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill"
+            viewBox="0 0 16 16">
+            <path
+              d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
+          </svg>
+          <span>Paramètre du Système</span>
+        </a>
+
+        <a class="nav-link {% if request.endpoint == 'support' %}active{% endif %}" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-question-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+            <path
+              d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94" />
+          </svg>
+          <span>Support</span>
+        </a>
+
+        <a class="nav-link" href="{{ url_for('login') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+              d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" />
+            <path fill-rule="evenodd"
+              d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" />
+          </svg>
+          <span>Se déconnecter</span>
+        </a>
+      </nav>
+    </aside>
+    <div class="admin-main">
+      <nav class="navbar admin-navbar navbar-expand bg-white">
+        <div class="container-fluid px-3 px-lg-4">
+          <h1 class="h3 mb-1">KAVA</h1>
+          <div class="navbar-actions ms-auto">
+            <div class="dropdown">
+              <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                aria-label="Notifications">
+                <span class="notification-dot"></span>
+                <i class="bi bi-bell" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="dropdown">
+              <a class="profile-button" href="{{ url_for('settings') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-person-gear" viewBox="0 0 16 16"
+                  src="{{ url_for('static', filename='css/images/avatar/avatar.jpg') }}">
+                  <path
+                    d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1zm3.63-4.54c.18-.613 1.048-.613 1.229 0l.043.148a.64.64 0 0 0 .921.382l.136-.074c.561-.306 1.175.308.87.869l-.075.136a.64.64 0 0 0 .382.92l.149.045c.612.18.612 1.048 0 1.229l-.15.043a.64.64 0 0 0-.38.921l.074.136c.305.561-.309 1.175-.87.87l-.136-.075a.64.64 0 0 0-.92.382l-.045.149c-.18.612-1.048.612-1.229 0l-.043-.15a.64.64 0 0 0-.921-.38l-.136.074c-.561.305-1.175-.309-.87-.87l.075-.136a.64.64 0 0 0-.382-.92l-.148-.045c-.613-.18-.613-1.048 0-1.229l.148-.043a.64.64 0 0 0 .382-.921l-.074-.136c-.306-.561.308-1.175.869-.87l.136.075a.64.64 0 0 0 .92-.382zM14 12.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="dashboard-content">
+        <div class="container-fluid px-3 px-lg-4 py-4">
+          <div class="page-heading">
+            <div class="page-heading-copy">
+              <span class="page-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-gear-fill" viewBox="0 0 16 16">
+                  <path
+                    d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
+                </svg>
+              </span>
+              <div>
+                <h1 class="h3 mb-1">Paramètres du système</h1>
+                <p class="text-muted mb-0">Gérez vos informations, la sécurité et les préférences de l'application.</p>
+              </div>
+            </div>
+          </div>
+          <section class="row g-0">
+            <div class="col-12 col-xl-5">
+              <form class="panel needs-validation" novalidate>
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                        fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                        <path
+                          d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                      </svg><span>Profil
+                        de l'utilisateur</span></h2>
+                    <p class="text-muted mb-0"></p>
+                  </div>
+                </div>
+
+                <div class="col-12 col-xl-8">
+                  <div class="col-8">
+                    <label class="form-label" for="profileName">Nom complet</label>
+                    <span class="form-control" id="profileName">Marco Ndongmo</span>
+                  </div>
+                  <br>
+                  <div class="col-8">
+                    <label class="form-label" for="email">Adresse Email</label>
+                    <span class="form-control" id="email">ndongmomarco@gmail.com</span>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="col-12 col-xl-7">
+              <div class="panel h-100">
+                <div>
+                  <h2 class="h5 mb-1 section-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                      fill="currentColor" class="bi bi-shield-shaded" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd"
+                        d="M8 14.933a1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                    </svg><span>Sécurité</span></h2>
+                  <p class="text-muted mb-0"></p>
+                </div>
+
+                <hr class="sidebar-divider">
+
+                <div class="col-md-6"><label class="form-label" for="rule">Mot de passe</label>
+                  <input class="mdp" type="submit" value="Changer le mot de passe">
+                </div><br>
+
+                <hr class="sidebar-divider">
+
+                <p>
+                <h5>Authentification à deux facteurs (2FA)</h5>
+                <h6>Renforcez la sécurité de votre compte en
+                  exigeant un code supplémentaire lors de
+                  la connexion.
+                  <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                </h6>
+                </p>
+                <div class="panel-header"></div>
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-5">
+              <div class="panel h-100">
+                <div>
+                  <h2 class="h5 mb-1 section-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                      fill="currentColor" class="bi bi-sliders2" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd"
+                        d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1.5a.5.5 0 0 1 0-1H10V1.5a.5.5 0 0 1 .5-.5M12 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-6.5 2A.5.5 0 0 1 6 6v1.5h8.5a.5.5 0 0 1 0 1H6V10a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5M1 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 1 8m9.5 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V13H1.5a.5.5 0 0 1 0-1H10v-1.5a.5.5 0 0 1 .5-.5m1.5 2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
+                    </svg><span>Préférences de l'application</span></h2>
+                  <p class="text-muted mb-0"></p>
+                </div>
+                <h6>Thème de l'application
+                  <select class="form-select">
+                    <option selected>Choisir le thème</option>
+                    <option>Clair</option>
+                    <option>Sombre</option>
+                  </select>
+                </h6>
+                <h6>Langue de l'application
+                  <select class="form-select">
+                    <option selected>Choisir la langue</option>
+                    <option>Français</option>
+                    <option>Anglais</option>
+                  </select>
+                </h6>
+
+                </p>
+                <div class="panel-header"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="admin-footer">
+        <div class="container-fluid px-3 px-lg-4">
+          <span>© 2026 CAVA WINE MANAGEMENT. ALL AMOUNTS IN FCFA.<br></span>
+          <span>Terms of Service.</span>
+          <span>Privacy Policy.</span>
+          <span><a href="{{ url_for('support') }}">Contact Support</a></span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="../assets/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+
+</html>

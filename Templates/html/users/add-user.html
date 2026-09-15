@@ -1,0 +1,58 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Ajouter un utilisateur | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-person-plus"></i>{% endblock %}
+{% block page_title %}Ajouter un utilisateur{% endblock %}
+{% block page_subtitle %}Créez un nouveau compte membre de l'équipe.{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('users') }}">
+  <i class="bi bi-arrow-left"></i> Retour à la liste
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('add_user') }}">
+  <div class="mb-3">
+    <label for="name" class="form-label">Nom<span class="text-danger">*</span></label>
+    <input type="text" class="form-control" id="name" name="name" required>
+  </div>
+  <div class="mb-3">
+    <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
+    <input type="email" class="form-control" id="email" name="email" required>
+  </div>
+  <div class="mb-3">
+    <label for="telephone" class="form-label">Téléphone<span class="text-danger">*</span></label>
+    <input type="text" class="form-control" id="telephone" name="telephone" required>
+  </div>
+  <div class="mb-3">
+    <label for="ville" class="form-label">Ville</label>
+    <input type="text" class="form-control" id="ville" name="ville" required>
+  </div>
+  <div class="mb-3">
+    <label for="quartier" class="form-label">Quartier</label>
+    <input type="text" class="form-control" id="quartier" name="quartier" required>
+  </div>
+  <div class="mb-3">
+    <label for="role" class="form-label">Rôle<span class="text-danger">*</span></label>
+    <select class="form-select" id="role" name="role" required>
+      <option value="Gérant">Gérant</option>
+      <option value="Caissier">Caissier</option>
+      <option value="Serveur">Serveur</option>
+      <option value="Livreur">Livreur</option>
+      <option value="DAF">DAF</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="status" class="form-label">Statut</label>
+    <select class="form-select" id="status" name="status" required>
+      <option value="Actif">Actif</option>
+      <option value="Inactif">Inactif</option>
+      <option value="Bloqué">Bloqué</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Enregistrer</button>
+  <a href="{{ url_for('users') }}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Produits | adminHMD{% endblock %}
+
+{% block page_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam"
+    viewBox="0 0 16 16">
+    <path
+        d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6zm-7.5 10.522V6.84l-6.5-2.6v7.922zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z" />
+</svg>
+{% endblock %}
+
+{% block page_title %}Gestion des Produits{% endblock %}
+{% block page_subtitle %}Gérez votre catalogue de produits.{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-primary btn-sm" href="{{ url_for('add_product') }}">
+    <i class="bi bi-plus-circle" aria-hidden="true"></i> Ajouter un produit
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel-header">
+    <form method="GET" action="{{ url_for('product') }}" class="relative">
+        <input type="text" name="q" placeholder="Rechercher un produit..."
+            class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-secal-green w-56"
+            value="{{ q }}">
+    </form>
+</div>
+<div class="table-responsive">
+    <table class="table align-middle" id="productsTable" data-searchable-table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prix d'achat</th>
+                <th>Prix de vente</th>
+                <th>Quantité en stock</th>
+                <th>Catégorie</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produit in product.items %}
+            <tr>
+                <td>{{ produit.name }}</td>
+                <td>{{ produit.prix_achat }}</td>
+                <td>{{ produit.prix_de_vente }}</td>
+                <td>{{ produit.quantite_en_stock }}</td>
+                <td>{{ produit.categorie }}</td>
+                <td
+                    class="status {{ 'text-success' if produit.status == 'En stock' else 'text-danger' if produit.status == 'Épuisé' else 'text-secondary' }}">
+                    {{ produit.status }}
+                </td>
+                <td class="text-end">
+                    <a href="{{ url_for('product_details', id=produit.id_produit) }}" class="btn btn-primary"><i
+                            class="bi bi-eye"></i></a>
+                    <a href="{{ url_for('edit_product', id=produit.id_produit) }}" class="btn btn-secondary"><i
+                            class="bi bi-pencil"></i></a>
+                    <form action="{{ url_for('delete_product', id=produit.id_produit) }}" method="POST"
+                        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"
+                        style="display:inline;">
+                        <button type="submit" class="btn btn-danger delete-product-btn"><i
+                                class="bi bi-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">Aucun produit trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-3">
+    <p class="text-muted small mb-0">Gestion du Catalogue Produits</p>
+    <nav aria-label="Products pagination">
+        <ul class="pagination pagination-sm mb-0">
+            {% if product.has_prev %}
+            <li class="page-item"><a class="page-link"
+                    href="{{ url_for('product', page=product.prev_num, q=q) }}">Previous</a></li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link btn disabled" href="">Previous</a></li>
+            {% endif %}
+            {% if product.has_next %}
+            <li class="page-item"><a class="page-link"
+                    href="{{ url_for('product', page=product.next_num, q=q) }}">Next</a></li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link btn disabled" href="">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

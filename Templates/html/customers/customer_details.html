@@ -1,0 +1,29 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Détails client | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-person-lines-fill"></i>{% endblock %}
+{% block page_title %}Détails du client{% endblock %}
+{% block page_subtitle %}{{ client.name }}{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('edit_customer', id_client=client.id_client) }}">
+    <i class="bi bi-pencil"></i> Modifier
+</a>
+<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('customers') }}">
+    <i class="bi bi-arrow-left"></i> Retour à la liste
+</a>
+{% endblock %}
+
+{% block content %}
+<dl class="row">
+    <dt class="col-sm-3">Nom</dt>
+    <dd class="col-sm-9">{{ client.name }}</dd>
+
+    <dt class="col-sm-3">Téléphone</dt>
+    <dd class="col-sm-9">{{ client.numero_de_telephone }}</dd>
+
+    <dt class="col-sm-3">Quartier de résidence</dt>
+    <dd class="col-sm-9">{{ client.quartier_de_residence }}</dd>
+</dl>
+{% endblock %}

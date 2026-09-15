@@ -1,0 +1,62 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Ajouter un produit | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-plus-circle"></i>{% endblock %}
+{% block page_title %}Ajouter un Produit{% endblock %}
+{% block page_subtitle %}Accéder à la gestion de vos produits.{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('product') }}">
+    <i class="bi bi-arrow-left"></i> Retour à la liste
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('add_product') }}">
+    <div class="mb-3">
+        <label for="name" class="form-label">Nom</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label>Prix d'achat</label>
+        <input class="form-control" type="number" name="prix_achat" step="0.01" required>
+    </div>
+    <div class="mb-3">
+        <label>Prix de vente</label>
+        <input class="form-control" type="number" name="prix_de_vente" step="0.01" required>
+    </div>
+    <div class="mb-3">
+        <label>Quantité en stock</label>
+        <input class="form-control" type="number" name="quantite_en_stock" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="role" class="form-label">Catégorie</label>
+        <select class="form-select" id="role" name="role" required>
+            <option value="Vin rouge">Vin rouge</option>
+            <option value="Vin blanc">Vin blanc</option>
+            <option value="Champagne">Champagne</option>
+            <option value="Spiritueux">Spiritueux</option>
+            <option value="Bières">Bières</option>
+            <option value="Boissons non alcoolisées">Boissons non alcoolisées</option>
+            <option value="Vodka">Vodka</option>
+            <option value="Whisky">Whisky</option>
+            <option value="Cognac">Cognac</option>
+            <option value="Soft">Soft</option>
+            <option value="Rhum">Rhum</option>
+            <option value="Autres">Autres</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="status" class="form-label">Statut</label>
+        <select class="form-select" id="status" name="status" required>
+            <option value="">Choisir un statut</option>
+            <option value="En stock">En stock</option>
+            <option value="Épuisé">Épuisé</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Ajouter le produit</button>
+    <a href="{{ url_for('product') }}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

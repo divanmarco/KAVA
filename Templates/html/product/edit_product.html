@@ -1,0 +1,65 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Modifier produit | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-pencil"></i>{% endblock %}
+{% block page_title %}Modifier le produit{% endblock %}
+{% block page_subtitle %}{{ product.name }}{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('product') }}">
+    <i class="bi bi-arrow-left"></i> Retour à la liste
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('edit_product', id=product.id_produit) }}">
+    <div class="mb-3">
+        <label for="name" class="form-label">Nom</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Prix d'achat</label>
+        <input class="form-control" type="number" step="0.01" name="prix_achat" value="{{ product.prix_achat }}"
+            required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Prix de vente</label>
+        <input class="form-control" type="number" step="0.01" name="prix_de_vente" value="{{ product.prix_de_vente }}"
+            required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Quantité en stock</label>
+        <input class="form-control" type="number" name="quantite_en_stock" value="{{ product.quantite_en_stock }}"
+            required>
+    </div>
+
+    <div class="mb-3">
+        <label for="categorie" class="form-label">Catégorie</label>
+        <select class="form-select" id="categorie" name="role" required>
+            <option value="Vin rouge" {% if product.categorie=="Vin rouge" %}selected{% endif %}>Vin rouge</option>
+            <option value="Vin blanc" {% if product.categorie=="Vin blanc" %}selected{% endif %}>Vin blanc</option>
+            <option value="Champagne" {% if product.categorie=="Champagne" %}selected{% endif %}>Champagne</option>
+            <option value="Spiritueux" {% if product.categorie=="Spiritueux" %}selected{% endif %}>Spiritueux</option>
+            <option value="Bières" {% if product.categorie=="Bières" %}selected{% endif %}>Bières</option>
+            <option value="Boissons non alcoolisées" {% if product.categorie=="Boissons non alcoolisées" %}selected{%
+                endif %}>Boissons non alcoolisées</option>
+            <option value="Vodka" {% if product.categorie=="Vodka" %}selected{% endif %}>Vodka</option>
+            <option value="Whisky" {% if product.categorie=="Whisky" %}selected{% endif %}>Whisky</option>
+            <option value="Cognac" {% if product.categorie=="Cognac" %}selected{% endif %}>Cognac</option>
+            <option value="Soft" {% if product.categorie=="Soft" %}selected{% endif %}>Soft</option>
+            <option value="Rhum" {% if product.categorie=="Rhum" %}selected{% endif %}>Rhum</option>
+            <option value="Autres" {% if product.categorie=="Autres" %}selected{% endif %}>Autres</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="status" class="form-label">Statut</label>
+        <select class="form-select" id="status" name="status" required>
+            <option value="En stock" {% if product.status=="En stock" %}selected{% endif %}>En stock</option>
+            <option value="Épuisé" {% if product.status=="Épuisé" %}selected{% endif %}>Épuisé</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+    <a href="{{ url_for('product') }}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

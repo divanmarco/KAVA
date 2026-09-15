@@ -1,0 +1,55 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Modifier utilisateur | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-pencil"></i>{% endblock %}
+{% block page_title %}Modifier l'utilisateur{% endblock %}
+{% block page_subtitle %}{{ user.name }}{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('users') }}">
+    <i class="bi bi-arrow-left"></i> Retour à la liste
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('edit_user', id=user.id) }}">
+    <div class="mb-3">
+        <label for="name" class="form-label">Nom</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="telephone" class="form-label">Téléphone</label>
+        <input type="text" class="form-control" id="telephone" name="telephone" value="{{ user.telephone }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="ville" class="form-label">Ville</label>
+        <input type="text" class="form-control" id="ville" name="ville" value="{{ user.ville }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="quartier" class="form-label">Quartier</label>
+        <input type="text" class="form-control" id="quartier" name="quartier" value="{{ user.quartier }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="role" class="form-label">Rôle</label>
+        <select class="form-select" id="role" name="role" required>
+            <option value="ADMIN" {% if user.role.name=='ADMIN' %}selected{% endif %}>Admin</option>
+            <option value="VENDEUR" {% if user.role.name=='VENDEUR' %}selected{% endif %}>Vendeur</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="status" class="form-label">Statut</label>
+        <select class="form-select" id="status" name="status" required>
+            <option value="Actif" {% if user.status=='Actif' %}selected{% endif %}>Actif</option>
+            <option value="Inactif" {% if user.status=='Inactif' %}selected{% endif %}>Inactif</option>
+            <option value="Bloqué" {% if user.status=='Bloqué' %}selected{% endif %}>Bloqué</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+    <a href="{{ url_for('users') }}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page de Connexion - CAVA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            display: flex;
+            max-width: 900px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-image {
+            flex: 1;
+            background-image: url("{{ url_for('static', filename='css/Murtazi.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            min-height: 500px;
+        }
+
+        .login-form-panel {
+            flex: 1;
+            background-color: #fff;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-image"></div>
+        <div class="login-form-panel">
+            <h2 class="mb-1 fw-bold">KAVA</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endwith %}
+
+            <h4 class="mt-4">Bienvenue sur KAVA</h4>
+            <p class="text-muted">Veuillez vous connecter à votre compte.</p>
+            <form id="auth" method="post" action="{{ url_for('login') }}">
+                <div class="mb-3">
+                    <label class="form-label">Nom d'utilisateur</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mot de passe</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                        <label class="form-check-label" for="remember">Se souvenir de moi</label>
+                    </div>
+                    <a href="#" class="small">Mot de passe oublié ?</a>
+                </div>
+                <input type="submit" value="Se connecter" class="btn btn-primary" onclick="setAction('login')">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function setAction(action) {
+            const form = document.getElementById('auth');
+            if (action === 'login') {
+                form.action = "{{ url_for('login') }}";
+                form.method = 'post';
+                form.submit();
+            }
+        }
+    </script>
+</body>
+
+</html>

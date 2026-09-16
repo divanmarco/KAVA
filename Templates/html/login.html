@@ -60,6 +60,7 @@
 
             <h4 class="mt-4">Bienvenue sur KAVA</h4>
             <p class="text-muted">Veuillez vous connecter à votre compte.</p>
+            <div id="outputSection" class="text-danger small mb-2"></div>
             <form id="auth" method="post" action="{{ url_for('login') }}">
                 <div class="mb-3">
                     <label class="form-label">Nom d'utilisateur</label>
@@ -76,21 +77,12 @@
                     </div>
                     <a href="#" class="small">Mot de passe oublié ?</a>
                 </div>
-                <input type="submit" value="Se connecter" class="btn btn-primary" onclick="setAction('login')">
+                <input type="submit" value="Se connecter" class="btn btn-primary">
             </form>
         </div>
     </div>
 
-    <script>
-        function setAction(action) {
-            const form = document.getElementById('auth');
-            if (action === 'login') {
-                form.action = "{{ url_for('login') }}";
-                form.method = 'post';
-                form.submit();
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 
 </html>

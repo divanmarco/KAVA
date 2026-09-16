@@ -61,7 +61,7 @@
               class="bi bi-pencil"></i></a>
           <button type="button" class="btn btn-danger delete-charts-btn" data-bs-toggle="modal"
             data-bs-target="#deleteModal" data-item-name="{{ rapport.name }}"
-            data-item-label="Supprimer le rapport ?" data-delete-url="{{ url_for('delete_charts', id=rapport.id) }}">
+            data-item-label="Supprimer le rapport ?" data-delete-url="{{ url_for('delete_charts', id=rapport.id_rapport) }}">
             <i class="bi bi-trash"></i>
           </button>
         </td>

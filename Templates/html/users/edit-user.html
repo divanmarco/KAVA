@@ -35,10 +35,13 @@
         <input type="text" class="form-control" id="quartier" name="quartier" value="{{ user.quartier }}" required>
     </div>
     <div class="mb-3">
-        <label for="role" class="form-label">Rôle</label>
+        <label for="role" class="form-label">Rôle<span class="text-danger">*</span></label>
         <select class="form-select" id="role" name="role" required>
-            <option value="ADMIN" {% if user.role.name=='ADMIN' %}selected{% endif %}>Admin</option>
-            <option value="VENDEUR" {% if user.role.name=='VENDEUR' %}selected{% endif %}>Vendeur</option>
+            <option value="Gérant" {% if user.role.value=='Gérant' %}selected{% endif %}>Gérant</option>
+            <option value="Caissier" {% if user.role.value=='Caissier' %}selected{% endif %}>Caissier</option>
+            <option value="Serveur" {% if user.role.value=='Serveur' %}selected{% endif %}>Serveur</option>
+            <option value="Livreur" {% if user.role.value=='Livreur' %}selected{% endif %}>Livreur</option>
+            <option value="DAF" {% if user.role.value=='DAF' %}selected{% endif %}>DAF</option>
         </select>
     </div>
     <div class="mb-3">

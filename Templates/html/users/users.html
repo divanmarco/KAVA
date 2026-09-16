@@ -44,7 +44,8 @@
     </thead>
     <tbody>
       {% for user in users.items %}
-      <tr>
+
+      <tr onclick="window.location.href='{{ url_for('user_details', id=user.id) }}';" style="cursor: pointer;">
         <td>{{ user.name }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.matricule }}</td>
@@ -65,6 +66,8 @@
           </button>
         </td>
       </tr>
+
+
       {% else %}
       <tr>
         <td colspan="8" class="text-center">Aucun utilisateur trouvé.</td>

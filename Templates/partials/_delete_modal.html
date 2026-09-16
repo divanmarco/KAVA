@@ -1,0 +1,27 @@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-4">
+        <div class="d-flex align-items-start mb-3">
+          <div class="text-danger me-3 fs-3">⚠️</div>
+          <div>
+            <h5 class="mb-1" id="deleteModalTitle">Supprimer l'élément ?</h5>
+            <p class="text-muted mb-0">Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible et toutes les données associées seront perdues.</p>
+          </div>
+        </div>
+
+        <div class="bg-light rounded p-3 mb-3">
+          <small class="text-muted d-block">Élément sélectionné</small>
+          <strong id="deleteModalItemName">—</strong>
+        </div>
+
+        <form id="deleteModalForm" method="POST" action="">
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-danger">🗑 Supprimer définitivement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Modifier un rapport | adminHMD{% endblock %}
+
+{% block page_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square"
+  viewBox="0 0 16 16">
+  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12z" />
+  <path fill-rule="evenodd"
+    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+</svg>
+{% endblock %}
+
+{% block page_title %}Modifier le rapport{% endblock %}
+{% block page_subtitle %}Mettez à jour les informations du rapport « {{ rapport.name }} ».{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('charts') }}">
+  <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('edit_charts', id=rapport.id_rapport) }}">
+
+      <div class="mb-3">
+        <label for="name" class="form-label">Nom du rapport</label>
+        <input type="text" class="form-control" id="name" name="name"
+          value="{{ rapport.name }}" required maxlength="100">
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="type" class="form-label">Type</label>
+          <select class="form-select" id="type" name="type">
+            <option value="rapport" {{ 'selected' if rapport.type == 'rapport' }}>Rapport</option>
+            <option value="bilan" {{ 'selected' if rapport.type == 'bilan' }}>Bilan</option>
+          </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="statut" class="form-label">Statut</label>
+          <select class="form-select" id="statut" name="statut" required>
+            <option value="brouillon" {{ 'selected' if rapport.statut == 'brouillon' }}>Brouillon</option>
+            <option value="publie" {{ 'selected' if rapport.statut == 'publie' }}>Publié</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="date_generation" class="form-label">Date de génération</label>
+        <input type="datetime-local" class="form-control" id="date_generation" name="date_generation"
+          value="{{ rapport.date_generation.strftime('%Y-%m-%dT%H:%M') if rapport.date_generation else '' }}"
+          required>
+      </div>
+
+      <div class="mb-3">
+        <label for="contenu" class="form-label">Contenu</label>
+        <textarea class="form-control" id="contenu" name="contenu" rows="8" required>{{ rapport.contenu }}</textarea>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <a href="{{ url_for('charts') }}" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check2"></i> Enregistrer
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const typeSelect = document.getElementById('type');
+    const contenuField = document.getElementById('contenu');
+
+    function toggleContenu() {
+      if (typeSelect.value === 'bilan') {
+        contenuField.disabled = true;
+        contenuField.classList.add('bg-light');
+        contenuField.dataset.originalRequired = contenuField.required ? '1' : '0';
+        contenuField.required = false;
+      } else {
+        contenuField.disabled = false;
+        contenuField.classList.remove('bg-light');
+        contenuField.required = true;
+      }
+    }
+
+  
+    toggleContenu();
+
+    typeSelect.addEventListener('change', toggleContenu);
+  });
+</script>
+{% endblock %}
+{% endblock %}

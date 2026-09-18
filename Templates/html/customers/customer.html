@@ -40,23 +40,26 @@
         </thead>
         <tbody>
             {% for client in customers.items %}
-            <tr>
-                <td>{{ client.name }}</td>
+            <tr class="position-relative">
+                <td>
+                    <a href="{{ url_for('customer_details', id_client=client.id_client) }}"
+                        class="stretched-link text-decoration-none text-dark">
+                        {{ client.name }}
+                    </a>
+                </td>
                 <td>{{ client.numero_de_telephone }}</td>
                 <td>{{ client.quartier_de_residence }}</td>
-                <td class="text-end">
-                    <a href="{{ url_for('customer_details', id_client=client.id_client) }}" class="btn btn-primary">
-                        <i class="bi bi-eye"></i>
-                    </a>
-                    <a href="{{ url_for('edit_customer', id_client=client.id_client) }}" class="btn btn-secondary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <form action="{{ url_for('delete_customer', id_client=client.id_client) }}" method="POST"
-                        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?');"
-                        style="display:inline;">
-                        <button type="submit" class="btn btn-danger delete-user-btn"><i
-                                class="bi bi-trash"></i></button>
-                    </form>
+                <td class="text-end position-relative" style="z-index: 2;">
+                    <a href="{{ url_for('customer_details', id_client=client.id_client) }}" class="btn btn-primary"><i
+                            class="bi bi-eye"></i></a>
+                    <a href="{{ url_for('edit_customer', id_client=client.id_client) }}" class="btn btn-secondary"><i
+                            class="bi bi-pencil"></i></a>
+                    <button type="button" class="btn btn-danger delete-product-btn" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal" data-item-name="{{ client.name }}"
+                        data-item-label="Supprimer le Client ?"
+                        data-delete-url="{{ url_for('delete_customer', id_client=client.id_client) }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </td>
             </tr>
             {% else %}

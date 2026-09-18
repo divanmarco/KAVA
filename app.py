@@ -34,7 +34,7 @@ migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
 
-@app.route('/')
+@app.route('/', methods = ['GET','POST'])
 @login_required
 def index():
     return render_template('html/index.html')
@@ -47,23 +47,30 @@ def login():
 
     if request.method == 'POST':
         name = request.form.get('name')
-        password = request.form.get('password') 
+        password = request.form.get('password')
 
         user = User.query.filter_by(name=name).first()
 
-        if user and user.email == password:
-            login_user(user)
-            flash(f"Bienvenue {user.name} !", "success")
-            return redirect(url_for('index'))
-        else:
+   
+        if not user or user.email != password:
             flash("Nom d'utilisateur ou mot de passe incorrect.", "danger")
 
+      
+
+        else:
+            login_user(user)
+            flash(f"Bienvenue {user.name} !")
+            return redirect(url_for('index'))
+
     return render_template('html/login.html')
+
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
+    session.pop('_flashes', None) 
+    flash("Vous avez été déconnecté avec succès.", "info")
     return redirect(url_for('login'))
 
 
@@ -376,7 +383,7 @@ def edit_charts(id):
         db.session.commit()
         flash("Rapport mis à jour avec succès.", "success")
         return redirect(url_for("charts"))
-    return render_template("html/charts/edit_charts.html", nouveau_rapport=nouveau_rapport)
+    return render_template("html/charts/edit_charts.html", rapport=nouveau_rapport)
 
 
 @app.route("/charts/charts_details/<int:id>")
@@ -424,15 +431,15 @@ def add_customer():
 
         if not name:
             flash("Le nom est obligatoire.", "danger")
-            return render_template("html/customers/add-customer.html")
+            return render_template("html/customers/add_customer.html")
 
         if not telephone:
             flash("Le numéro de téléphone est obligatoire.", "danger")
-            return render_template("html/customers/add-customer.html")
+            return render_template("html/customers/add_customer.html")
 
         if not quartier:
             flash("Le quartier de résidence est obligatoire.", "danger")
-            return render_template("html/customers/add-customer.html")
+            return render_template("html/customers/add_customer.html")
 
         nouveau_client = Client(
             name=name,
@@ -446,12 +453,12 @@ def add_customer():
         except IntegrityError:
             db.session.rollback()
             flash("Une erreur est survenue lors de l'enregistrement du client.", "danger")
-            return render_template("html/customers/add-customer.html")
+            return render_template("html/customers/add_customer.html")
 
         flash("Client ajouté avec succès.", "success")
         return redirect(url_for("customers"))
 
-    return render_template("html/customers/add-customer.html")
+    return render_template("html/customers/add_customer.html")
 
 
 @app.route("/customers/edit-customer.html/<int:id_client>", methods=["GET", "POST"])
@@ -466,13 +473,13 @@ def edit_customer(id_client):
         flash("Client mis à jour avec succès.", "success")
         return redirect(url_for("customers"))
 
-    return render_template("html/customers/edit-customer.html", client=client)
+    return render_template("html/customers/edit_customer.html", client=client)
 
 
 @app.route("/customer-details/<int:id_client>")
 def customer_details(id_client):
     client = Client.query.get_or_404(id_client)
-    return render_template("html/customers/customer-details.html", client=client)
+    return render_template("html/customers/customer_details.html", client=client)
 
 
 @app.route("/delete-customer/<int:id_client>", methods=["POST"])
@@ -499,11 +506,11 @@ def customers():
 
     customers_page = customers_query.paginate(page=page, per_page=5, error_out=False)
 
-    return render_template('html/customers/customers.html', customers=customers_page, q=query)
+    return render_template('html/customers/customer.html', customers=customers_page, q=query)
 
 
 
-
+# support route
 @app.route('/support', methods=['GET', 'POST'])
 @login_required
 def support():
@@ -532,6 +539,19 @@ def support():
         return redirect(url_for('index'))
 
     return render_template('html/support.html')
+
+# forgot passzord route
+# @app.route("/change-password", methods=["POST"])
+# @login_required
+# def change_password():
+#     current = request.form.get("current_password")
+#     new = request.form.get("new_password")
+#     confirm = request.form.get("confirm_password")
+
+#     if new != confirm:
+#         flash("Les mots de passe ne correspondent pas.", "error")
+#         return redirect(url_for("settings"))
+
 
 
 

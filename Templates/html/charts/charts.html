@@ -45,23 +45,28 @@
     </thead>
     <tbody>
       {% for rapport in charts.items %}
-      <tr>
-        <td>{{ rapport.name }}</td>
+      <tr class="position-relative">
+        <td>
+          <a href="{{ url_for('charts_details', id=rapport.id_rapport) }}"
+            class="stretched-link text-decoration-none text-dark">
+            {{ rapport.name }}
+          </a>
+        </td>
         <td>{{ rapport.type }}</td>
         <td>{{ rapport.contenu[:80] }}{% if rapport.contenu|length > 80 %}…{% endif %}</td>
         <td>{{ rapport.date_generation.strftime('%d/%m/%Y') if rapport.date_generation else '' }}</td>
         <td
-          class="status {{ 'text-success' if rapport.statut == 'Publié' else 'text-secondary' if rapport.statt == 'En cours' }}">
+          class="status {{ 'text-success' if rapport.statut == 'Publié' else 'text-danger' if rapport.statt == 'En cours' }}">
           {{ 'Publié' if rapport.statut == 'publie' else 'Brouillon' }}
         </td>
-        <td class="text-end">
+        <td class="text-end position-relative" style="z-index: 2;">
           <a href="{{ url_for('charts_details', id=rapport.id_rapport) }}" class="btn btn-primary"><i
               class="bi bi-eye"></i></a>
           <a href="{{ url_for('edit_charts', id=rapport.id_rapport) }}" class="btn btn-secondary"><i
               class="bi bi-pencil"></i></a>
           <button type="button" class="btn btn-danger delete-charts-btn" data-bs-toggle="modal"
-            data-bs-target="#deleteModal" data-item-name="{{ rapport.name }}"
-            data-item-label="Supprimer le rapport ?" data-delete-url="{{ url_for('delete_charts', id=rapport.id_rapport) }}">
+            data-bs-target="#deleteModal" data-item-name="{{ charts.name }}" data-item-label="Supprimer ?"
+            data-delete-url="{{ url_for('delete_charts', id=rapport.id_rapport) }}">
             <i class="bi bi-trash"></i>
           </button>
         </td>

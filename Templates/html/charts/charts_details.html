@@ -9,32 +9,35 @@
 {% block heading_actions %}
 <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_charts', id=nouveau_rapport.id_rapport) }}">
   Modifier
-<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('charts') }}">
-  <i class="bi bi-arrow-left"></i> Retour à la liste
-</a>
-{% endblock %}
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('charts') }}">
+    <i class="bi bi-arrow-left"></i> Retour à la liste
+  </a>
+  {% endblock %}
 
-{% block content %}
-<dl class="row">
-  <dt class="col-sm-3">Nom</dt>
-  <dd class="col-sm-9">{{ nouveau_rapport.name }}</dd>
+  {% block content %}
+  <dl class="row">
+    <dt class="col-sm-3">Nom</dt>
+    <dd class="col-sm-9">{{ nouveau_rapport.name }}</dd>
 
-  <dt class="col-sm-3">Contenu</dt>
-  <dd class="col-sm-9">{{ nouveau_rapport.contenu }}</dd>
+    <dt class="col-sm-3">Contenu</dt>
+    <dd class="col-sm-9">{{ nouveau_rapport.contenu }}</dd>
 
-  <dt class="col-sm-3">Date</dt>
-  <dd class="col-sm-9">{{ nouveau_rapport.date_generation }}</dd>
+    <dt class="col-sm-3">Date Début</dt>
+    <dd class="col-sm-9">{{ nouveau_rapport.date_debut }}</dd>
 
-  <dt class="col-sm-3">Type</dt>
-  <dd class="col-sm-9">{{ nouveau_rapport.type }}</dd>
+    <dt class="col-sm-3">Date Fin</dt>
+    <dd class="col-sm-9">{{ nouveau_rapport.date_fin }}</dd>
+
+    <dt class="col-sm-3">Type</dt>
+    <dd class="col-sm-9">{{ nouveau_rapport.type }}</dd>
 
 
-  <dt class="col-sm-3">Statut</dt>
-  <dd class="col-sm-9">
-    <span
-      class="{{ 'text-success' if nouveau_rapport.statut == 'Publié' else 'text-seconfary' if nouveau_rapport.statut == 'En cours' }}">
-      {{ nouveau_rapport.status }}
-    </span>
-  </dd>
-</dl>
-{% endblock %}
+    <dt class="col-sm-3">Statut</dt>
+    <dd class="col-sm-9">
+      <span
+        class="{{ 'text-success' if nouveau_rapport.statut == 'Publié' else 'text-seconfary' if nouveau_rapport.statut == 'En cours' }}">
+        {{ nouveau_rapport.status }}
+      </span>
+    </dd>
+  </dl>
+  {% endblock %}

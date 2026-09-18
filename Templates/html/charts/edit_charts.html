@@ -43,16 +43,23 @@
         <div class="col-md-6 mb-3">
           <label for="statut" class="form-label">Statut</label>
           <select class="form-select" id="statut" name="statut" required>
-            <option value="brouillon" {{ 'selected' if rapport.statut == 'brouillon' }}>Brouillon</option>
+            <option value="brouillon" {{ 'selected' if rapport.statut == 'En cours' }}>Brouillon</option>
             <option value="publie" {{ 'selected' if rapport.statut == 'publie' }}>Publié</option>
           </select>
         </div>
       </div>
 
       <div class="mb-3">
-        <label for="date_generation" class="form-label">Date de génération</label>
-        <input type="datetime-local" class="form-control" id="date_generation" name="date_generation"
-          value="{{ rapport.date_generation.strftime('%Y-%m-%dT%H:%M') if rapport.date_generation else '' }}"
+        <label for="date_debut" class="form-label">Date de Début</label>
+        <input type="datetime-local" class="form-control" id="date_debut" name="date_debut"
+          value="{{ rapport.date_debut.strftime('%Y-%m-%dT%H:%M') if rapport.date_debut else '' }}"
+          required>
+      </div>
+
+      <div class="mb-3">
+        <label for="date_fin" class="form-label">Date de Fin</label>
+        <input type="datetime-local" class="form-control" id="date_fin" name="date_fin"
+          value="{{ rapport.date_fin.strftime('%Y-%m-%dT%H:%M') if rapport.date_fin else '' }}"
           required>
       </div>
 

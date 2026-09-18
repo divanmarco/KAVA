@@ -1,6 +1,6 @@
 {% extends "html/layout.html" %}
 
-{% block title %}Rapports & Bilans | adminHMD{% endblock %}
+{% block title %}Rapports & Bilans {% endblock %}
 
 {% block page_icon %}
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard2-data"
@@ -38,7 +38,8 @@
         <th>Nom</th>
         <th>Type</th>
         <th>Contenu</th>
-        <th>Date de génération</th>
+        <th>Date début</th>
+        <th>Date fin</th>
         <th>Statut</th>
         <th class="text-end">Action</th>
       </tr>
@@ -54,9 +55,10 @@
         </td>
         <td>{{ rapport.type }}</td>
         <td>{{ rapport.contenu[:80] }}{% if rapport.contenu|length > 80 %}…{% endif %}</td>
-        <td>{{ rapport.date_generation.strftime('%d/%m/%Y') if rapport.date_generation else '' }}</td>
+        <td>{{ rapport.date_debut.strftime('%d/%m/%Y') if rapport.date_debut else '' }}</td>
+        <td>{{ rapport.date_fin.strftime('%d/%m/%Y') if rapport.date_fin else '' }}</td>
         <td
-          class="status {{ 'text-success' if rapport.statut == 'Publié' else 'text-danger' if rapport.statt == 'En cours' }}">
+          class="status {{ 'text-success' if rapport.statut == 'Publié' else 'text-danger' if rapport.statut == 'En cours' }}">
           {{ 'Publié' if rapport.statut == 'publie' else 'Brouillon' }}
         </td>
         <td class="text-end position-relative" style="z-index: 2;">

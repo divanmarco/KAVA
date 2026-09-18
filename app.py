@@ -16,6 +16,7 @@ import os
 from datetime import datetime
 from models import Commentaire
 from flask_login import login_required, current_user
+from models import Rapport_de_Compte
 
 
 app = Flask(__name__)
@@ -328,7 +329,8 @@ def add_charts():
     if request.method == "POST":
         name = request.form.get("name")
         contenu = request.form.get("contenu")
-        date_generation = request.form.get("date_generation")
+        date_debut = request.form.get("date_debut")
+        date_fin = request.form.get("date_fin")
         type = request.form.get("type")
         statut = request.form.get("statut")
 
@@ -338,9 +340,12 @@ def add_charts():
         if not contenu:
             flash("Le contenu est obligatoire.", "danger")
             return render_template("html/charts/add_charts.html")
-        if not date_generation:
+        if not date_debut:
             flash("La date de création est obligatoire.", "danger")
             return render_template("html/charts/add_charts.html")
+        if not date_fin:
+                    flash("La date de création est obligatoire.", "danger")
+                    return render_template("html/charts/add_charts.html")
         if not type:
             flash("Le type est obligatoire.", "danger")
             return render_template("html/charts/add_charts.html")
@@ -351,7 +356,8 @@ def add_charts():
         nouveau_rapport = Rapport_de_Compte(
             name=name,
             contenu=contenu,
-            date_generation=date_generation,
+            date_debut=date_debut,
+            date_fin=date_fin,
             type=type,
             statut=statut,
             id_utilisateur=current_user.id
@@ -376,7 +382,8 @@ def edit_charts(id):
     if request.method == "POST":
         nouveau_rapport.name = request.form.get("name")
         nouveau_rapport.contenu = request.form.get("contenu")
-        nouveau_rapport.date_generation = request.form.get("date_generation")
+        nouveau_rapport.date_debut = request.form.get("date_debut")
+        nouveau_rapport.date_fin = request.form.get("date_fin")
         nouveau_rapport.type = request.form.get("type")
         nouveau_rapport.statut = request.form.get("statut")
 
@@ -529,7 +536,7 @@ def support():
         nouveau_commentaire = Commentaire(
             id_utilisateur=current_user.id,
             contenu=f"Sujet : {sujet}\n\n{contenu}",
-            date_generation=datetime.now()
+            date_debut=datetime.now()
         )
 
         db.session.add(nouveau_commentaire)

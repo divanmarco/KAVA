@@ -1,3 +1,6 @@
+from datetime import date
+
+from flask.config import T
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length
@@ -146,7 +149,9 @@ class Rapport_de_Compte(db.Model):
     id_utilisateur = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     contenu = db.Column(db.Text, nullable=False)
-    date_generation = db.Column(db.DateTime, nullable=False)
+
+    date_debut = db.Column(db.DateTime, nullable=True)
+    date_fin =db.Column(db.DateTime, nullable=True)
     type = db.Column(db.String(50), nullable=True) 
 
     statut = db.Column(

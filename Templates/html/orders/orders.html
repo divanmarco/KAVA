@@ -1,0 +1,82 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Commandes | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-receipt"></i>{% endblock %}
+{% block page_title %}Gestion des Commandes{% endblock %}
+{% block page_subtitle %}Consultez les commandes et les ventes enregistrées.{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-primary btn-sm" href="{{ url_for('add_orders') }}">
+    <i class="bi bi-plus-circle" aria-hidden="true"></i> Nouvelle commande
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel-header mb-3">
+    <form method="GET" action="{{ url_for('orders') }}">
+        <input type="text" name="q" placeholder="Rechercher par client..."
+            class="form-control form-control-sm w-auto" value="{{ q }}">
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th class="text-end">Montant</th>
+                <th class="text-end">Perçu</th>
+                <th>Statut</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in orders.items %}
+            <tr>
+                <td>{{ row.Commande.id_commande }}</td>
+                <td>{{ row.client_name }}</td>
+                <td>{{ row.date_vente.strftime('%d/%m/%Y %H:%M') if row.date_vente else '-' }}</td>
+                <td class="text-end">{{ row.montant_attendu or 0 }}</td>
+                <td class="text-end">{{ row.montant_percue or 0 }}</td>
+                <td>
+                    {% if row.statut == 'payee' %}
+                    <span class="badge bg-success">Payée</span>
+                    {% elif row.statut == 'partielle' %}
+                    <span class="badge bg-warning text-dark">Partielle</span>
+                    {% elif row.statut == 'impayee' %}
+                    <span class="badge bg-danger">Impayée</span>
+                    {% else %}
+                    <span class="badge bg-secondary">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Aucune commande trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-3">
+    <p class="text-muted small mb-0">Gestion des Commandes</p>
+    <nav aria-label="Orders pagination">
+        <ul class="pagination pagination-sm mb-0">
+            {% if orders.has_prev %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('orders', page=orders.prev_num, q=q) }}">Previous</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+            {% if orders.has_next %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('orders', page=orders.next_num, q=q) }}">Next</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}c

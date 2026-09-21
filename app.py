@@ -1,4 +1,6 @@
 import email
+from commande import creer_commande, StockInsuffisant
+from flask_login import current_user, login_required
 from unicodedata import name
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
@@ -6,7 +8,7 @@ from config import Config
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt 
 from extensions import db, login, migrate, bcrypt
-from models import User
+from models import User,Produits
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 import secrets
@@ -40,7 +42,6 @@ with app.app_context():
 def index():
     return render_template('html/index.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -51,13 +52,10 @@ def login():
         password = request.form.get('password')
 
         user = User.query.filter_by(name=name).first()
-
-   
         if not user or user.email != password:
             flash("Nom d'utilisateur ou mot de passe incorrect.", "danger")
-
-      
-
+        elif user.role.value  != 'Gérant':
+            flash("Seul le Gérant peut se connecter pour l'instant.", "warning")
         else:
             login_user(user)
             flash(f"Bienvenue {user.name} !")
@@ -562,26 +560,90 @@ def support():
 
 
 
+#gestion des ventes et commandes 
+@app.route("/add_orders.html", methods=["GET", "POST"])
+@login_required
+def add_orders():
+    customers = Client.query.order_by(Client.name).all()
+    products = Produits.query.filter(Produits.quantite_en_stock > 0).order_by(Produits.name).all()
+
+    if request.method == "POST":
+        id_client = request.form.get("id_client", type=int)
+        mode_vente = request.form.get("mode_vente")
+        montant_percue = request.form.get("montant_percue", type=float) or 0
+        ids_produits = request.form.getlist("id_produit")
+        quantites = request.form.getlist("quantite")
+
+        if not id_client:
+            flash("Le client est obligatoire.", "danger")
+            return render_template("html/orders/add_orders.html", customers=customers, products=products)
+
+        if mode_vente not in ("comptant", "credit", "livraison"):
+            flash("Le mode de vente est obligatoire.", "danger")
+            return render_template("html/orders/add_orders.html", customers=customers, products=products)
+
+        try:
+            lignes = [
+                {"id_produit": int(id_produit), "quantite": int(quantite)}
+                for id_produit, quantite in zip(ids_produits, quantites)
+                if id_produit and quantite
+            ]
+        except ValueError:
+            flash("Les quantités doivent être des nombres entiers.", "danger")
+            return render_template("html/orders/add_orders.html", customers=customers, products=products)
+
+        try:
+            creer_commande(
+                id_client=id_client,
+                lignes=lignes,
+                id_utilisateur=current_user.id,
+                mode_vente=mode_vente,
+                montant_percue=montant_percue,
+            )
+        except StockInsuffisant as e:
+            flash(str(e), "danger")
+            return render_template("html/orders/add_orders.html", customers=customers, products=products)
+        except ValueError as e:
+            flash(str(e), "danger")
+            return render_template("html/orders/add_orders.html", customers=customers, products=products)
+        except IntegrityError:
+            flash("Une erreur est survenue lors de l'enregistrement de la commande.", "danger")
+            return render_template("html/orders/add_orders.html", customers=customers, products=products)
+
+        flash("Commande enregistrée avec succès.", "success")
+        return redirect(url_for("add_orders"))
+
+    return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
 
 
 
 
+@app.route("/orders.html")
+@login_required
+def orders():
+    page = request.args.get("page", 1, type=int)
+    q = request.args.get("q", "", type=str).strip()
 
+    query = (
+        Commande.query
+        .join(Client, Commande.id_client == Client.id_client)
+        .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
+        .add_columns(
+            Client.name.label("client_name"),
+            Vente.montant_attendu.label("montant_attendu"),
+            Vente.montant_percue.label("montant_percue"),
+            Vente.statut.label("statut"),
+            Vente.date_vente.label("date_vente"),
+        )
+    )
+    if q:
+        query = query.filter(Client.name.ilike(f"%{q}%"))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    commandes = query.order_by(Commande.id_commande.desc()).paginate(
+        page=page, per_page=10, error_out=False
+    )
+    return render_template("html/orders/orders.html", orders=commandes, q=q)
 
 
 
@@ -667,9 +729,6 @@ def support():
 def blank():
     return render_template("html/alerts.html")
 
-@app.route("/orders.html", methods=["GET", "POST"])
-def orders():
-    return render_template("html/orders.html")
 
 @app.route("/forms.html", methods=["GET", "POST"])
 def forms():

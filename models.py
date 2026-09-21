@@ -1,5 +1,5 @@
 from datetime import date
-
+from decimal import Decimal
 from flask.config import T
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
@@ -103,6 +103,8 @@ class Ligne_Commande(db.Model):
     id_commande = db.Column(db.Integer, db.ForeignKey("commande.id_commande"), nullable=False)
     id_produit = db.Column(db.Integer, db.ForeignKey("produits.id_produit"), nullable=False)
     name = db.Column(db.String(50), nullable=False)
+    quantite = db.Column(db.Integer, nullable=False, default=1, server_default="1")
+    prix_unitaire = db.Column(db.Numeric(10, 2), nullable=False, default=0, server_default="0")
 
 
 class Vente(db.Model):
@@ -202,3 +204,4 @@ class Session(db.Model):
 #         render_kw={"placeholder": "password", "id": "mdp", "class": "eye-icon"}
 #     )
 #     submit = SubmitField('Login')
+

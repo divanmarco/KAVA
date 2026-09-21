@@ -1,0 +1,91 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Nouvelle commande{% endblock %}
+
+{% block page_icon %}<i class="bi bi-cart-plus"></i>{% endblock %}
+{% block page_title %}Nouvelle commande{% endblock %}
+{% block page_subtitle %}Choisissez le client et les produits vendus.{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-secondary btn-sm" href="{{ url_for('add_customer') }}">
+    <i class="bi bi-person-plus"></i> Nouveau client
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('add_orders') }}">
+    <div class="mb-3">
+        <label for="id_client" class="form-label">Client</label>
+        <select class="form-select" id="id_client" name="id_client" required>
+            <option value="">Choisir un client</option>
+            {% for customer in customers %}
+            <option value="{{ customer.id_client }}">{{ customer.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <label class="form-label">Produits</label>
+    <div id="lignes">
+        <div class="row g-2 mb-2 ligne-produit">
+            <div class="col-md-7">
+                <select class="form-select" name="id_produit" required>
+                    <option value="">Choisir un produit</option>
+                    {% for product in products %}
+                    <option value="{{ product.id_produit }}">
+                        {{ product.name }} - {{ product.prix_de_vente }} ({{ product.quantite_en_stock }} en stock)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input class="form-control" type="number" name="quantite" min="1" value="1" required>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-danger w-100 supprimer-ligne">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <button type="button" id="ajouter-ligne" class="btn btn-outline-primary btn-sm mb-3">
+        <i class="bi bi-plus-circle"></i> Ajouter un produit
+    </button>
+
+    <div class="mb-3">
+        <label for="mode_vente" class="form-label">Mode de vente</label>
+        <select class="form-select" id="mode_vente" name="mode_vente" required>
+            <option value="">Choisir un mode</option>
+            <option value="comptant">Comptant</option>
+            <option value="credit">Crédit</option>
+            <option value="livraison">Livraison</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="montant_percue" class="form-label">Montant perçu</label>
+        <input class="form-control" type="number" id="montant_percue" name="montant_percue" step="0.01" min="0" value="0">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enregistrer la commande</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const lignes = document.getElementById("lignes");
+
+    document.getElementById("ajouter-ligne").addEventListener("click", function () {
+        const copie = lignes.querySelector(".ligne-produit").cloneNode(true);
+        copie.querySelector("select").selectedIndex = 0;
+        copie.querySelector("input").value = 1;
+        lignes.appendChild(copie);
+    });
+
+    lignes.addEventListener("click", function (e) {
+        const bouton = e.target.closest(".supprimer-ligne");
+        if (bouton && lignes.querySelectorAll(".ligne-produit").length > 1) {
+            bouton.closest(".ligne-produit").remove();
+        }
+    });
+</script>
+{% endblock %}

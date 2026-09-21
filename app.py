@@ -1,4 +1,4 @@
-import email
+from decimal import Decimal, InvalidOperation
 from commande import creer_commande, StockInsuffisant
 from flask_login import current_user, login_required
 from unicodedata import name
@@ -561,6 +561,38 @@ def support():
 
 
 #gestion des ventes et commandes 
+
+
+def _lignes_commande(id_commande):
+    rows = (
+        db.session.query(Ligne_Commande, Produits)
+        .join(Produits, Produits.id_produit == Ligne_Commande.id_produit) 
+        .filter(Ligne_Commande.id_commande == id_commande)
+        .all()
+    )
+    lignes = []
+    for ligne, produit in rows:
+        quantite = ligne.quantite or 0
+        prix = ligne.prix_unitaire or 0
+        lignes.append({
+            "produit": produit.name,  # <-- À ADAPTER (name ? nom ? libelle ?)
+            "quantite": quantite,
+            "prix_unitaire": prix,
+            "sous_total": quantite * prix,
+        })
+    total = sum(l["sous_total"] for l in lignes)
+    return lignes, total
+ 
+ 
+def _calculer_statut(attendu, percue):
+    """payee / partielle / impayee, comme dans la liste des commandes."""
+    if percue >= attendu and attendu > 0:
+        return "payee"
+    if percue > 0:
+        return "partielle"
+    return "impayee"
+
+ 
 @app.route("/add_orders.html", methods=["GET", "POST"])
 @login_required
 def add_orders():
@@ -616,7 +648,88 @@ def add_orders():
     return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
 
+@app.route("/orders/<int:id_commande>")
+@login_required
+def orders_details(id_commande):
+    commande = Commande.query.get_or_404(id_commande)
+    client = Client.query.get(commande.id_client)  
+    vente = Vente.query.filter_by(id_commande=id_commande).first()  
+    lignes, total = _lignes_commande(id_commande)
+ 
+    return render_template(
+        "html/orders/orders_details.html",
+        commande=commande,
+        client=client,
+        vente=vente,
+        lignes=lignes,
+        total=total,
+    )
+@app.route("/orders/<int:id_commande>/edit", methods=["GET", "POST"])
+@login_required
+def edit_orders(id_commande):
+    commande = Commande.query.get_or_404(id_commande)
+    vente = Vente.query.filter_by(id_commande=id_commande).first()  
+    customers = Client.query.order_by(Client.name).all()
+ 
+    if request.method == "POST":
+        id_client = request.form.get("id_client", type=int)
+        if not id_client or not Client.query.get(id_client):
+            flash("Veuillez choisir un client valide.", "danger")
+            return redirect(url_for("edit_orders", id_commande=id_commande))
+ 
+        commande.id_client = id_client  
+ 
+        if vente:
+            try:
+                percue = Decimal(request.form.get("montant_percue", "0") or "0")
+            except InvalidOperation:
+                flash("Montant perçu invalide.", "danger")
+                return redirect(url_for("edit_orders", id_commande=id_commande))
+ 
+            if percue < 0:
+                flash("Le montant perçu ne peut pas être négatif.", "danger")
+                return redirect(url_for("edit_orders", id_commande=id_commande))
+ 
+            vente.montant_percue = percue
+            vente.statut = _calculer_statut(Decimal(vente.montant_attendu or 0), percue)
+ 
+        db.session.commit()
+        flash("Commande modifiée avec succès.", "success")
+        return redirect(url_for("orders_details", id_commande=id_commande))
+ 
+    lignes, total = _lignes_commande(id_commande)
+    return render_template(
+        "html/orders/edit_orders.html",
+        commande=commande,
+        vente=vente,
+        customers=customers,
+        lignes=lignes,
+        total=total,
+    )
 
+
+@app.route("/orders/<int:id_commande>/delete", methods=["POST"])
+@login_required
+def delete_orders(id_commande):
+    commande = Commande.query.get_or_404(id_commande)
+    try:
+        lignes = Ligne_Commande.query.filter_by(id_commande=id_commande).all()
+        for ligne in lignes:
+            produit = product.query.get(ligne.id_produit)
+            if produit:
+                produit.stock += ligne.quantite 
+
+        Vente.query.filter_by(id_commande=id_commande).delete()
+        Ligne_Commande.query.filter_by(id_commande=id_commande).delete()
+        db.session.delete(commande)
+
+        db.session.commit()
+        flash("Commande supprimée avec succès.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Impossible de supprimer cette commande.", "danger")
+
+    return redirect(url_for("orders"))
 
 
 @app.route("/orders.html")
@@ -647,109 +760,9 @@ def orders():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@app.route("/alerts.html", methods=["GET", "POST"])
-def blank():
-    return render_template("html/alerts.html")
-
-
-@app.route("/forms.html", methods=["GET", "POST"])
-def forms():
-    return render_template("html/forms.html")
-
-@app.route("/add_forms.html", methods=["GET", "POST"])
-def add_form():
-    return render_template("html/add_forms.html")
-
-
-@app.route("/tables.html", methods=["GET", "POST"])
-def table():
-    return render_template("html/tables.html")
-
-
-
-
-
-@app.route('/reports')
-def reports():
-    return render_template('html/reports/reports.html')
+# @app.route("/alerts.html", methods=["GET", "POST"])
+# def blank():
+#     return render_template("html/alerts.html")
 
 
 if __name__ == '__main__':

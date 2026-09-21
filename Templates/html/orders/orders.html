@@ -15,8 +15,8 @@
 {% block content %}
 <div class="panel-header mb-3">
     <form method="GET" action="{{ url_for('orders') }}">
-        <input type="text" name="q" placeholder="Rechercher par client..."
-            class="form-control form-control-sm w-auto" value="{{ q }}">
+        <input type="text" name="q" placeholder="Rechercher par client..." class="form-control form-control-sm w-auto"
+            value="{{ q }}">
     </form>
 </div>
 
@@ -27,17 +27,21 @@
                 <th>N°</th>
                 <th>Client</th>
                 <th>Date</th>
-                <th class="text-end">Montant</th>
-                <th class="text-end">Perçu</th>
-                <th>Statut</th>
-                <th>Action</th>
+                <th>Montant Perçu</th>
+                <th class="text-end">Reste à payer</th>
+                <th class="text-end">Statut</th>
+                <th class="text-end">Action</th>
             </tr>
         </thead>
         <tbody>
             {% for row in orders.items %}
             <tr>
                 <td>{{ row.Commande.id_commande }}</td>
-                <td>{{ row.client_name }}</td>
+                <td> <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
+                        class="stretched-link text-decoration-none text-dark">
+                        {{ row.client_name }}
+                    </a>
+                </td>
                 <td>{{ row.date_vente.strftime('%d/%m/%Y %H:%M') if row.date_vente else '-' }}</td>
                 <td class="text-end">{{ row.montant_attendu or 0 }}</td>
                 <td class="text-end">{{ row.montant_percue or 0 }}</td>
@@ -52,6 +56,23 @@
                     <span class="badge bg-secondary">-</span>
                     {% endif %}
                 </td>
+                <td>
+                    <a class="btn btn-outline-primary btn-sm" title="Détails"
+                        href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary btn-sm" title="Modifier"
+                        href="{{ url_for('edit_orders', id_commande=row.Commande.id_commande) }}">
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                    <button type="button" class="btn btn-danger delete-orders-btn" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal" data-item-name="{{ row.client_name }}"
+                        data-item-label="Supprimer la Commande ?"
+                        data-delete-url="{{ url_for('delete_orders', id_commande=row.Commande.id_commande) }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+
             </tr>
             {% else %}
             <tr>
@@ -67,12 +88,14 @@
     <nav aria-label="Orders pagination">
         <ul class="pagination pagination-sm mb-0">
             {% if orders.has_prev %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('orders', page=orders.prev_num, q=q) }}">Previous</a></li>
+            <li class="page-item"><a class="page-link"
+                    href="{{ url_for('orders', page=orders.prev_num, q=q) }}">Previous</a></li>
             {% else %}
             <li class="page-item disabled"><span class="page-link">Previous</span></li>
             {% endif %}
             {% if orders.has_next %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('orders', page=orders.next_num, q=q) }}">Next</a></li>
+            <li class="page-item"><a class="page-link"
+                    href="{{ url_for('orders', page=orders.next_num, q=q) }}">Next</a></li>
             {% else %}
             <li class="page-item disabled"><span class="page-link">Next</span></li>
             {% endif %}

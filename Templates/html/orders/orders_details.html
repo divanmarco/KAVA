@@ -1,0 +1,103 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Commande n°{{ commande.id_commande }} | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-receipt"></i>{% endblock %}
+{% block page_title %}Détails de la commande n°{{ commande.id_commande }}{% endblock %}
+{% block page_subtitle %}Client, produits commandés et état du paiement.{% endblock %}
+
+{% block heading_actions %}
+<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('orders') }}">
+    <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
+</a>
+<a class="btn btn-primary btn-sm" href="{{ url_for('edit_orders', id_commande=commande.id_commande) }}">
+    <i class="bi bi-pencil" aria-hidden="true"></i> Modifier
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-person" aria-hidden="true"></i> Client
+            </div>
+            <div class="card-body">
+                {% if client %}
+                <p class="mb-1"><strong>Nom :</strong> {{ client.name }}</p>
+                <p class="mb-1"><strong>Téléphone :</strong> {{ client.numero_de_telephone or '-' }}</p>
+                <p class="mb-0"><strong>Quartier :</strong> {{ client.quartier_de_residence or '-' }}</p>
+                {% else %}
+                <p class="text-muted mb-0">Client introuvable.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-cash" aria-hidden="true"></i> Facture
+            </div>
+            <div class="card-body">
+                {% if vente %}
+                <p class="mb-1"><strong>Date :</strong>
+                    {{ vente.date_vente.strftime('%d/%m/%Y %H:%M') if vente.date_vente else '-' }}
+                </p>
+                <p class="mb-1"><strong>Montant attendu :</strong> {{ vente.montant_attendu or 0 }}</p>
+                <p class="mb-1"><strong>Montant perçu :</strong> {{ vente.montant_percue or 0 }}</p>
+                <p class="mb-1"><strong>Reste à payer :</strong>
+                    {{ (vente.montant_attendu or 0) - (vente.montant_percue or 0) }}
+                </p>
+                <p class="mb-0"><strong>Statut :</strong>
+                    {% if vente.statut == 'payee' %}
+                    <span class="badge bg-success">Payée</span>
+                    {% elif vente.statut == 'partielle' %}
+                    <span class="badge bg-warning text-dark">Partielle</span>
+                    {% elif vente.statut == 'impayee' %}
+                    <span class="badge bg-danger">Impayée</span>
+                    {% else %}
+                    <span class="badge bg-secondary">-</span>
+                    {% endif %}
+                </p>
+                {% else %}
+                <p class="text-muted mb-0">Aucune vente associée à cette commande.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h6 mb-2">Produits commandés</h2>
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th class="text-end">Quantité</th>
+                <th class="text-end">Prix unitaire</th>
+                <th class="text-end">Sous-total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in lignes %}
+            <tr>
+                <td>{{ ligne.produit }}</td>
+                <td class="text-end">{{ ligne.quantite }}</td>
+                <td class="text-end">{{ ligne.prix_unitaire }}</td>
+                <td class="text-end">{{ ligne.sous_total }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">Aucune ligne pour cette commande.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-end">Total</th>
+                <th class="text-end">{{ total }}</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}

@@ -7,7 +7,6 @@ from models import Client, Produits, Commande, Ligne_Commande, Vente
 class StockInsuffisant(Exception):
     """Levée quand le stock ne permet pas de vendre la quantité demandée."""
 
-
 def creer_commande(id_client, lignes, id_utilisateur, mode_vente="comptant", montant_percue=0):
    
     if not lignes:
@@ -29,14 +28,13 @@ def creer_commande(id_client, lignes, id_utilisateur, mode_vente="comptant", mon
             if quantite <= 0:
                 raise ValueError("La quantité doit être supérieure à 0.")
 
-            # with_for_update verrouille la ligne du produit pendant la vente
-            produit = db.session.get(Produits, ligne["id_produit"], with_for_update=True)
+            produit = db.session.get(Produits, ligne["id_produit"], with_for_update=True)  # le with c'est pour éviter que deux servuers lisent "stock = 1" (si c'est la dernière valeur restante) en même temps, passer la vérification, et créer deux commandes pour un seul article en stock qui causerait une erreur. 
             if produit is None:
                 raise ValueError(f"Produit {ligne['id_produit']} introuvable.")
 
             if produit.quantite_en_stock < quantite:
                 raise StockInsuffisant(
-                    f"Stock insuffisant pour « {produit.name} » : "
+                    f"Stock insuffisant pour « {produit.name} » : " 
                     f"{produit.quantite_en_stock} disponible(s), {quantite} demandé(s)."
                 )
 
@@ -58,8 +56,10 @@ def creer_commande(id_client, lignes, id_utilisateur, mode_vente="comptant", mon
             statut = "payee"
         elif montant_percue > 0:
             statut = "partielle"
-        else:
+        elif montant_percue == 0:
             statut = "impayee"
+        else:
+            statut = "À Livrer"
 
         db.session.add(Vente(
             id_commande=commande.id_commande,

@@ -1,5 +1,6 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:venv",
     "python.REPL.enableREPLSmartSend": false,
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.autoImportCompletions": true,
+    "git.ignoreLimitWarning": true
 }

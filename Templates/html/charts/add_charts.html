@@ -2,9 +2,9 @@
 
 {% block title %}Rapports & Bilans | adminHMD{% endblock %}
 
-{% block page_icon %}<i class="bi bi-person-plus"></i>{% endblock %}
+{% block page_icon %}<i class="bi bi-file-earmark-plus"></i>{% endblock %}
 {% block page_title %}Ajouter un Rapport{% endblock %}
-{% block page_subtitle %}Générer un nouveau formaulaire{% endblock %}
+{% block page_subtitle %}Générer un nouveau formulaire{% endblock %}
 
 {% block heading_actions %}
 <a class="btn btn-secondary btn-sm" href="{{ url_for('charts') }}">
@@ -21,7 +21,7 @@
   <div class="mb-3">
     <label for="type" class="form-label">Type</label>
     <select class="form-select" id="type" name="type" required>
-      <option value="" disabled selected></option>
+     	<option value="" disabled selected>Choisir un type…</option>
       <option value="rapport">Rapport</option>
       <option value="bilan">Bilan</option>
     </select>
@@ -30,20 +30,18 @@
     <label for="contenu" class="form-label">Contenu</label>
     <textarea class="form-control" id="contenu" name="contenu" rows="4" required></textarea>
   </div>
- 
 
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="date_debut" class="form-label">Date de début</label>
-          <input type="date" class="form-control" id="date_debut" name="date_debut"
-            value="{{ rapport.date_debut.strftime('%Y-%m-%d') if rapport.date_debut else '' }}">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="date_fin" class="form-label">Date de fin</label>
-          <input type="date" class="form-control" id="date_fin" name="date_fin"
-            value="{{ rapport.date_fin.strftime('%Y-%m-%d') if rapport.date_fin else '' }}">
-        </div>
-      </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="date_debut" class="form-label">Date de début</label>
+      <input type="date" class="form-control" id="date_debut" name="date_debut" required>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="date_fin" class="form-label">Date de fin</label>
+      <input type="date" class="form-control" id="date_fin" name="date_fin" required>
+    </div>
+  </div>
   <div class="mb-3">
     <label for="statut" class="form-label">Statut</label>
     <select class="form-select" id="statut" name="statut" required>

@@ -1,7 +1,6 @@
 from decimal import Decimal, InvalidOperation
 from commande import creer_commande, StockInsuffisant
 from flask_login import current_user, login_required
-from unicodedata import name
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
 from config import Config
@@ -15,6 +14,7 @@ import secrets
 from sqlalchemy import or_
 import re
 import os
+from sqlalchemy import func
 from datetime import datetime
 from models import Commentaire
 from flask_login import login_required, current_user
@@ -36,11 +36,26 @@ bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
+from sqlalchemy import desc
 
-@app.route('/', methods = ['GET','POST'])
+@app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    return render_template('html/index.html')
+    commandes_recentes = (
+        db.session.query(
+            Commande.id_commande,
+            Client.name.label('client_name'),
+            Vente.montant_attendu,
+            Vente.montant_percue,
+            Vente.statut,
+        )
+        .join(Client, Commande.id_client == Client.id_client)
+        .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
+        .order_by(desc(Commande.id_commande))
+        .limit(5)
+        .all()
+    )
+    return render_template('html/index.html', commandes_recentes=commandes_recentes)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -664,6 +679,8 @@ def orders_details(id_commande):
         lignes=lignes,
         total=total,
     )
+
+
 @app.route("/orders/<int:id_commande>/edit", methods=["GET", "POST"])
 @login_required
 def edit_orders(id_commande):
@@ -765,5 +782,43 @@ def orders():
 #     return render_template("html/alerts.html")
 
 
+
+# @app.route('/')
+# def dashboard():
+#     # 1. KPIs globaux issus de différents modèles
+#     total_clients = Client.query.count()
+#     total_commandes = Commande.query.filter(Commande.statut != 'Annulé').count()
+#     chiffre_affaires = db.session.query(func.sum(Vente.prix_total)).scalar() or 0.0
+
+#     # 2. Top produits (Jointure Vente <-> Produit)
+#     top_produits_data = db.session.query(
+#         product.nom, func.sum(Vente.quantite).label('total_quantite')
+#     ).join(Vente).group_by(product.id).order_by(func.sum(Vente.quantite).desc()).limit(5).all()
+
+#     # 3. Performance des Commerciaux (Jointure Commande <-> Utilisateur <-> Vente)
+#     perf_commerciaux = db.session.query(
+#         users.nom, func.sum(Vente.prix_total).label('ca_genere')
+#     ).join(Commande, users.id == Commande.utilisateur_id)\
+#      .join(Vente, Commande.id == Vente.commande_id)\
+#      .group_by(users.id).all()
+
+#     # Préparation des données pour le rendu
+#     donnees = {
+#         "kpis": {
+#             "clients": total_clients,
+#             "commandes": total_commandes,
+#             "ca": round(chiffre_affaires, 2)
+#         },
+#         "top_produits": {
+#             "labels": [p[0] for p in top_produits_data],
+#             "valeurs": [p[1] for p in top_produits_data]
+#         },
+#         "commerciaux": {
+#             "labels": [c[0] for c in perf_commerciaux],
+#             "valeurs": [c[1] for c in perf_commerciaux]
+#         }
+#     }
+
+#     return render_template('dashboard_complet.html', donnees=donnees)
 if __name__ == '__main__':
     app.run(debug=True)

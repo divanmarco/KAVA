@@ -37,8 +37,9 @@
             {% for row in orders.items %}
             <tr>
                 <td>{{ row.Commande.id_commande }}</td>
-                <td> <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
-                        class="stretched-link text-decoration-none text-dark">
+                <td>
+                    <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
+                        >
                         {{ row.client_name }}
                     </a>
                 </td>
@@ -53,7 +54,7 @@
                     {% elif row.statut == 'impayee' %}
                     <span class="badge bg-danger">Impayée</span>
                     {% else %}
-                    <span class="badge bg-secondary">-</span>
+                    <span class="badge bg-secondary">À Livrer</span>
                     {% endif %}
                 </td>
                 <td>

@@ -207,27 +207,16 @@ input {
 
 
 
+.btn-gold {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #4d0000;
+    --bs-btn-border-color: #b8860b;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #9a7009;
+    --bs-btn-hover-border-color: #9a7009;
+    --bs-btn-active-bg: #855f07;
+    --bs-btn-active-border-color: #855f07;
+}
 
 
 
-
-
-
-
-
-
-
-
-
-
-/* html:not([data-theme="dark"]) {
-  --admin-sidebar:  #5c1a2b;
-  --admin-sidebar-soft: #eef4ff;
-  --admin-sidebar-border: #dbe4ef;
-  --admin-sidebar-text: #475569;
-  --admin-sidebar-text-strong: #0f172a;
-  --admin-sidebar-muted: #64748b;
-  --admin-sidebar-icon-bg: #eaf2ff;
-  --admin-sidebar-icon: #2563eb;
-  --admin-sidebar-shadow: 18px 0 42px rgba(15, 23, 42, 0.08);
-} */

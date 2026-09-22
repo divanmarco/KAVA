@@ -57,7 +57,6 @@
             <option value="">Choisir un mode</option>
             <option value="comptant">Comptant</option>
             <option value="credit">Crédit</option>
-            <option value="livraison">Livraison</option>
         </select>
     </div>
 
@@ -74,7 +73,8 @@
 <script>
     const lignes = document.getElementById("lignes");
 
-    document.getElementById("ajouter-ligne").addEventListener("click", function () {
+    document.getElementById("ajouter-ligne").addEventListener("click",
+     function () {
         const copie = lignes.querySelector(".ligne-produit").cloneNode(true);
         copie.querySelector("select").selectedIndex = 0;
         copie.querySelector("input").value = 1;

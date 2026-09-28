@@ -7,7 +7,7 @@
 {% block page_subtitle %}Consultez les commandes et les ventes enregistrées.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-primary btn-sm" href="{{ url_for('add_orders') }}">
+<a class="btn btn-gold btn-sm" href="{{ url_for('add_orders') }}">
     <i class="bi bi-plus-circle" aria-hidden="true"></i> Nouvelle commande
 </a>
 {% endblock %}
@@ -27,26 +27,29 @@
                 <th>N°</th>
                 <th>Client</th>
                 <th>Date</th>
-                <th>Montant Perçu</th>
+                <th class="text-end">Montant attendu</th>
+                <th class="text-end">Montant perçu</th>
                 <th class="text-end">Reste à payer</th>
-                <th class="text-end">Statut</th>
+                <th class="text-center">Statut</th>
                 <th class="text-end">Action</th>
             </tr>
         </thead>
         <tbody>
             {% for row in orders.items %}
+            {% set attendu = row.montant_attendu or 0 %}
+            {% set percue = row.montant_percue or 0 %}
             <tr>
                 <td>{{ row.Commande.id_commande }}</td>
                 <td>
-                    <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
-                        >
+                    <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}">
                         {{ row.client_name }}
                     </a>
                 </td>
                 <td>{{ row.date_vente.strftime('%d/%m/%Y %H:%M') if row.date_vente else '-' }}</td>
-                <td class="text-end">{{ row.montant_attendu or 0 }}</td>
-                <td class="text-end">{{ row.montant_percue or 0 }}</td>
-                <td>
+                <td class="text-end">{{ attendu }}</td>
+                <td class="text-end">{{ percue }}</td>
+                <td class="text-end">{{ attendu - percue }}</td>
+                <td class="text-center">
                     {% if row.statut == 'payee' %}
                     <span class="badge bg-success">Payée</span>
                     {% elif row.statut == 'partielle' %}
@@ -57,27 +60,22 @@
                     <span class="badge bg-secondary">À Livrer</span>
                     {% endif %}
                 </td>
-                <td>
-                    <a class="btn btn-outline-primary btn-sm" title="Détails"
-                        href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}">
-                        <i class="bi bi-eye" aria-hidden="true"></i>
-                    </a>
-                    <a class="btn btn-outline-secondary btn-sm" title="Modifier"
-                        href="{{ url_for('edit_orders', id_commande=row.Commande.id_commande) }}">
-                        <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </a>
-                    <button type="button" class="btn btn-danger delete-orders-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal" data-item-name="{{ row.client_name }}"
-                        data-item-label="Supprimer la Commande ?"
+                <td class="text-end position-relative" style="z-index: 2;">
+                    <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}" class="btn btn-gold"><i
+                            class="bi bi-eye"></i></a>
+                    <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}" class="btn btn-secondary"><i
+                            class="bi bi-pencil"></i></a>
+                    <button type="button" class="btn btn-gold delete-orders-btn" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal" 
+                        data-item-label="Supprimer la commande de {{row.client_name }} ?"
                         data-delete-url="{{ url_for('delete_orders', id_commande=row.Commande.id_commande) }}">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
-
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="text-center">Aucune commande trouvée.</td>
+                <td colspan="8" class="text-center">Aucune commande trouvée.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -103,4 +101,4 @@
         </ul>
     </nav>
 </div>
-{% endblock %}c
+{% endblock %}

@@ -15,7 +15,7 @@
 {% block page_subtitle %}Gérez les accès et les rôles de votre équipe.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-primary btn-sm" href="{{ url_for('add_user') }}">
+<a class="btn btn-gold btn-sm" href="{{ url_for('add_user') }}">
   <i class="bi bi-person-plus" aria-hidden="true"></i> Ajouter un utilisateur
 </a>
 {% endblock %}
@@ -61,9 +61,9 @@
           {{ user.status }}
         </td>
         <td class="text-end position-relative" style="z-index: 2;">
-          <a href="{{ url_for('user_details', id=user.id) }}" class="btn btn-primary"><i class="bi bi-eye"></i></a>
+          <a href="{{ url_for('user_details', id=user.id) }}" class="btn btn-gold"><i class="bi bi-eye"></i></a>
           <a href="{{ url_for('edit_user', id=user.id) }}" class="btn btn-secondary"><i class="bi bi-pencil"></i></a>
-          <button type="button" class="btn btn-danger delete-user-btn" data-bs-toggle="modal"
+          <button type="button" class="btn btn-gold delete-user-btn" data-bs-toggle="modal"
             data-bs-target="#deleteModal" data-item-name="{{ user.name }}" data-item-label="Supprimer l'utilisateur ?"
             data-delete-url="{{ url_for('delete_user', id=user.id) }}">
             <i class="bi bi-trash"></i>

@@ -52,7 +52,7 @@
             <option value="Bloqué" {% if user.status=='Bloqué' %}selected{% endif %}>Bloqué</option>
         </select>
     </div>
-    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+    <button type="submit" class="btn btn-gold">Mettre à jour</button>
     <a href="{{ url_for('users') }}" class="btn btn-secondary">Annuler</a>
 </form>
 {% endblock %}

@@ -20,13 +20,14 @@
     </div>
     <div class="mb-3">
         <label for="telephone" class="form-label">Numéro de téléphone</label>
-        <input type="text" class="form-control" id="telephone" name="telephone" required>
+        <input type="tel" name="telephone" class="form-control" pattern="[0-9]{9}" maxlength="9" required>
     </div>
+
     <div class="mb-3">
         <label for="quartier" class="form-label">Quartier de résidence</label>
         <input type="text" class="form-control" id="quartier" name="quartier" required>
     </div>
-    <button type="submit" class="btn btn-primary">Enregistrer</button>
-    <a href="{{ url_for('customers') }}" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="btn btn-gold">Enregistrer</button>
+        <a href="{{ url_for('customers') }}" class="btn btn-secondary">Annuler</a>
 </form>
 {% endblock %}

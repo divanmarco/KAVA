@@ -14,8 +14,8 @@
 {% block page_subtitle %}Consultez et gérez votre carnet de clients.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-primary btn-sm" href="{{ url_for('add_customer') }}">
-    <i class="bi bi-person-plus" aria-hidden="true"></i> Ajouter un client
+<a class="btn btn-gold btn-sm" href="{{ url_for('add_customer') }}">
+  <i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Ajouter un rapport
 </a>
 {% endblock %}
 
@@ -50,11 +50,11 @@
                 <td>{{ client.numero_de_telephone }}</td>
                 <td>{{ client.quartier_de_residence }}</td>
                 <td class="text-end position-relative" style="z-index: 2;">
-                    <a href="{{ url_for('customer_details', id_client=client.id_client) }}" class="btn btn-primary"><i
+                    <a href="{{ url_for('customer_details', id_client=client.id_client) }}" class="btn btn-gold"><i
                             class="bi bi-eye"></i></a>
                     <a href="{{ url_for('edit_customer', id_client=client.id_client) }}" class="btn btn-secondary"><i
                             class="bi bi-pencil"></i></a>
-                    <button type="button" class="btn btn-danger delete-product-btn" data-bs-toggle="modal"
+                    <button type="button" class="btn btn-gold delete-product-btn" data-bs-toggle="modal"
                         data-bs-target="#deleteModal" data-item-name="{{ client.name }}"
                         data-item-label="Supprimer le Client ?"
                         data-delete-url="{{ url_for('delete_customer', id_client=client.id_client) }}">

@@ -1,0 +1,90 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Livraisons | adminHMD{% endblock %}
+
+{% block page_icon %}<i class="bi bi-truck"></i>{% endblock %}
+{% block page_title %}Gestion des Livraisons{% endblock %}
+{% block page_subtitle %}Suivez les livraisons des commandes.{% endblock %}
+
+{% block content %}
+<div class="panel-header mb-3">
+    <form method="GET" action="{{ url_for('delivery') }}">
+        <input type="text" name="q" placeholder="Rechercher par client ou livreur..."
+            class="form-control form-control-sm w-auto" value="{{ q }}">
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Commande</th>
+                <th>Client</th>
+                <th>Livreur</th>
+                <th>Adresse</th>
+                <th>Date prévue</th>
+                <th>Date effective</th>
+                <th>Statut</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in deliveries.items %}
+            <tr>
+                <td>{{ row.Livraison.id }}</td>
+                <td>
+                    <a href="{{ url_for('orders_details', id_commande=row.Livraison.id_commande) }}">
+                        #{{ row.Livraison.id_commande }}
+                    </a>
+                </td>
+                <td>{{ row.client_name }}</td>
+                <td>{{ row.livreur_name }}</td>
+                <td>{{ row.Livraison.adresse_livraison }}</td>
+                <td>{{ row.Livraison.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ row.Livraison.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if row.Livraison.date_livraison_effective else '-' }}</td>
+                <td>
+                    {% if row.Livraison.statut == 'livree' %}
+                    <span class="badge bg-success">Livrée</span>
+                    {% elif row.Livraison.statut == 'annulee' %}
+                    <span class="badge bg-danger">Annulée</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">En cours</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a class="btn btn-outline-gold btn-sm" title="Voir la commande"
+                        href="{{ url_for('orders_details', id_commande=row.Livraison.id_commande) }}">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center">Aucune livraison trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-3">
+    <p class="text-muted small mb-0">Gestion des Livraisons</p>
+    <nav aria-label="Delivery pagination">
+        <ul class="pagination pagination-sm mb-0">
+            {% if deliveries.has_prev %}
+            <li class="page-item"><a class="page-link"
+                    href="{{ url_for('delivery', page=deliveries.prev_num, q=q) }}">Previous</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+            {% if deliveries.has_next %}
+            <li class="page-item"><a class="page-link"
+                    href="{{ url_for('delivery', page=deliveries.next_num, q=q) }}">Next</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

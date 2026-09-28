@@ -19,7 +19,8 @@
             <label for="id_client" class="form-label">Client</label>
             <select name="id_client" id="id_client" class="form-select" required>
                 {% for c in customers %}
-                <option value="{{ commande.id_client }}" {% if commande.id_client == commande.id_client %}selected{% endif %}>
+                <option value="{{ commande.id_client }}" {% if commande.id_client==commande.id_client %}selected{% endif
+                    %}>
                     {{ c.name }}
                 </option>
                 {% endfor %}
@@ -29,8 +30,8 @@
         <div class="col-md-6">
             <label for="montant_percue" class="form-label">Montant perçu</label>
             {% if vente %}
-            <input type="number" name="montant_percue" id="montant_percue" class="form-control"
-                min="0" step="0.01" value="{{ vente.montant_percue or 0 }}" required>
+            <input type="number" name="montant_percue" id="montant_percue" class="form-control" min="0" step="0.01"
+                value="{{ vente.montant_percue or 0 }}" required>
             <div class="form-text">
                 Montant attendu : <strong>{{ vente.montant_attendu or 0 }}</strong>.
             </div>
@@ -38,6 +39,22 @@
             <input type="number" class="form-control" value="0" disabled>
             <div class="form-text">Aucune vente associée : le paiement ne peut pas être modifié.</div>
             {% endif %}
+        </div>
+
+        <div>
+            <label for="statut" class="form-label">Statut</label>
+            <select name="statut" id="statut" class="form-select" required>
+                {% for value, label in [
+                ('impayee', 'Impayée'),
+                ('partielle', 'Partielle'),
+                ('payee', 'Payée'),
+                ('a_livrer', 'À livrer')
+                ] %}
+                <option value="{{ value }}" {% if commande.statut==value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
         </div>
     </div>
 
@@ -76,10 +93,11 @@
     </div>
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm">
+        <button type="submit" class="btn btn-gold btn-sm">
             <i class="bi bi-check-circle" aria-hidden="true"></i> Enregistrer
         </button>
-        <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('orders_details', id_commande=commande.id_commande) }}">
+        <a class="btn btn-outline-secondary btn-sm"
+            href="{{ url_for('orders_details', id_commande=commande.id_commande) }}">
             Annuler
         </a>
     </div>

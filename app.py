@@ -20,6 +20,7 @@ from models import Commentaire
 from flask_login import login_required, current_user
 from models import Rapport_de_Compte
 
+STATUTS_VALIDES = ('impayee', 'partielle', 'payee', 'a_livrer')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/kava'
@@ -455,7 +456,10 @@ def add_customer():
 
         if not telephone:
             flash("Le numéro de téléphone est obligatoire.", "danger")
-            return render_template("html/customers/add_customer.html")
+            return render_template("html/customers/add_customer.html")        
+
+        if not telephone.isdigit() or len(telephone) != 9:
+            return redirect(url_for("customer"))
 
         if not quartier:
             flash("Le quartier de résidence est obligatoire.", "danger")
@@ -477,7 +481,6 @@ def add_customer():
 
         flash("Client ajouté avec succès.", "success")
         return redirect(url_for("customers"))
-
     return render_template("html/customers/add_customer.html")
 
 
@@ -681,39 +684,45 @@ def orders_details(id_commande):
     )
 
 
-@app.route("/orders/<int:id_commande>/edit", methods=["GET", "POST"])
+
+@app.route("/orders/edit/<int:id_commande>", methods=["GET", "POST"])
 @login_required
 def edit_orders(id_commande):
     commande = Commande.query.get_or_404(id_commande)
-    vente = Vente.query.filter_by(id_commande=id_commande).first()  
+    vente = Vente.query.filter_by(id_commande=id_commande).first()
     customers = Client.query.order_by(Client.name).all()
- 
+
     if request.method == "POST":
         id_client = request.form.get("id_client", type=int)
         if not id_client or not Client.query.get(id_client):
             flash("Veuillez choisir un client valide.", "danger")
             return redirect(url_for("edit_orders", id_commande=id_commande))
- 
-        commande.id_client = id_client  
- 
+        commande.id_client = id_client
+
+        statut = request.form.get("statut")
+        if statut not in STATUTS_VALIDES:
+            flash("Statut invalide.", "danger")
+            return redirect(url_for("edit_orders", id_commande=id_commande))
+        commande.statut = statut
+
         if vente:
             try:
                 percue = Decimal(request.form.get("montant_percue", "0") or "0")
             except InvalidOperation:
                 flash("Montant perçu invalide.", "danger")
                 return redirect(url_for("edit_orders", id_commande=id_commande))
- 
+
             if percue < 0:
                 flash("Le montant perçu ne peut pas être négatif.", "danger")
                 return redirect(url_for("edit_orders", id_commande=id_commande))
- 
+
             vente.montant_percue = percue
             vente.statut = _calculer_statut(Decimal(vente.montant_attendu or 0), percue)
- 
+
         db.session.commit()
         flash("Commande modifiée avec succès.", "success")
         return redirect(url_for("orders_details", id_commande=id_commande))
- 
+
     lignes, total = _lignes_commande(id_commande)
     return render_template(
         "html/orders/edit_orders.html",
@@ -776,6 +785,37 @@ def orders():
     return render_template("html/orders/orders.html", orders=commandes, q=q)
 
 
+# Delivery roads
+@app.route('/delivery')
+@login_required
+def delivery():
+    page = request.args.get('page', 1, type=int)
+    q = request.args.get('q', '').strip()
+
+    query = (
+        db.session.query(
+            Livraison,
+            Client.name.label('client_name'),
+            User.name.label('livreur_name'),
+        )
+        .join(Client, Livraison.id_client == Client.id_client)
+        .join(User, Livraison.id_utilisateur == User.id)
+    )
+
+    if q:
+        query = query.filter(
+            or_(
+                Client.name.ilike(f'%{q}%'),
+                User.name.ilike(f'%{q}%'),
+            )
+        )
+
+    deliveries = (
+        query.order_by(Livraison.date_livraison_prevue.desc())
+        .paginate(page=page, per_page=10, error_out=False)
+    )
+
+    return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
 
 # @app.route("/alerts.html", methods=["GET", "POST"])
 # def blank():

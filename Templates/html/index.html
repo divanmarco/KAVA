@@ -28,15 +28,8 @@
           </svg>
         </span>
       </div>
-      <div class="devise metric-value">2 450 000<span class="devise1">FCFA</span></div>
+      <div class="devise metric-value">{{ ca_total }}<span class="devise1">FCFA</span></div>
       <div class="metric-meta">
-        <span class="text-success">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-            class="bi bi-graph-up-arrow" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
-          </svg>+12% ce mois
-        </span>
       </div>
     </article>
   </div>
@@ -44,7 +37,7 @@
   <div class="col-12 col-sm-6 col-xl-3">
     <article class="metric-card metric-success">
       <div class="metric-top">
-        <span class="metric-label">COMMANDES</span>
+        <span class="metric-label">VENTES RÉALISÉES</span>
         <span class="metric-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart"
             viewBox="0 0 16 16">
@@ -53,8 +46,7 @@
           </svg>
         </span>
       </div>
-      <div class="metric-value">24</div>
-      <div class="metric-meta"><span class="text-secondary">5 en attente</span></div>
+      <div class="metric-value">{{ total_articles }}</div>
     </article>
   </div>
 
@@ -80,42 +72,71 @@
   <div class="col-12 col-sm-6 col-xl-3">
     <article class="metric-card metric-warning">
       <div class="metric-top">
-        <span class="metric-label">NOUVEAUX CLIENTS</span>
+        <span class="metric-label">Clients Enregistrés</span>
         <span class="metric-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
       </div>
-      <div class="metric-value">18</div>
+      <div class="metric-value">{{ total_clients }}</div>
       <div class="metric-meta">
-        <span class="text-success">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-            class="bi bi-graph-up-arrow" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5" />
-          </svg>+4 cette semaine
-        </span>
       </div>
     </article>
   </div>
 </section>
+<!-- <div class="card">
+            <h3>Articles Vendus</h3>
+            <p>{{ total_articles }}</p>
+        </div>
+        <div class="card">
+            <h3>Top Produit</h3>
+            <p style="color: #27ae60;">{{ produit_star }}</p>
+        </div>
+    </div> -->
 
-<section class="row g-3 mt-1">
+<!-- <h2>Détail des Transactions</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix Unitaire</th>
+            <th>Total</th>
+        </tr>
+        {% for v in ventes %}
+        <tr>
+            <td>{{ v.id }}</td>
+            <td>{{ v.produit }}</td>
+            <td>{{ v.quantite }}</td>
+            <td>{{ v.prix_unitaire }} €</td>
+            <td>{{ v.quantite * v.prix_unitaire }} €</td>
+        </tr>
+        {% endfor %}
+    </table> -->
+<!-- <section class="row g-3 mt-1">
   <div class="col-12 col-xl-8">
     <div class="panel">
       <div class="panel-header">
         <div>
           <h2 class="h5 mb-1 section-title"><span>Répartition des stocks</span></h2>
+          <p class="text-muted small mb-0">Barres : stock actuel · Texte : part déjà vendue</p>
         </div>
         <a class="btn btn-gold btn-sm" href="{{ url_for('charts') }}">Voir le détails</a>
       </div>
-      <div class="chart-bars" aria-label="Sales performance chart">
-        <div class="chart-column bar-12"><span></span><small>Vodka</small></div>
-        <div class="chart-column bar-28"><span></span><small>Bière</small></div>
-        <div class="chart-column bar-72"><span></span><small>Champagne</small></div>
-        <div class="chart-column bar-42"><span></span><small>Vin</small></div>
-        <div class="chart-column bar-16"><span></span><small>Soft</small></div>
-        <div class="chart-column bar-43"><span></span><small>Whisky</small></div>
+
+      <div class="chart-bars" aria-label="Stock et ratio de ventes par catégorie">
+        {% for s in stock_stats %}
+        <div class="chart-column" title="{{ s.label }} : {{ s.stock }} en stock, {{ s.vendu }} vendus">
+          <span style="height: {{ s.stock_pct }}%">
+
+          </span>
+          <small>{{ s.label }}</small>
+          <small class="d-block text-muted">{{ s.ratio }} % vendu</small>
+        </div>
+        {% else %}
+        <p class="text-muted text-center w-100 my-4">Aucune donnée de stock ou de vente.</p>
+        {% endfor %}
       </div>
     </div>
-  </div>
+  </div> -->
+
 
   <div class="col-12 col-xl-4">
     <div class="panel h-100">
@@ -123,39 +144,52 @@
         <h6 class="m-0 font-weight-bold text-gold">Commandes Récentes</h6>
         <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout.</a>
       </div>
-      <div class="panel-header">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Clients</th>
-              <th scope="col">Status</th>
-              <th scope="col">Montant</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in commandes_recentes %}
-            <tr>
-              <td>{{ row.client_name }}<br><span class="devise">cmd-{{ row.id_commande }}</span></td>
-              <td>
-                {% if row.statut == 'payee' %}
-                <span class="badge bg-success">Payée</span>
-                {% elif row.statut == 'partielle' %}
-                <span class="badge bg-warning text-dark">Partielle</span>
-                {% elif row.statut == 'impayee' %}
-                <span class="badge bg-danger">Impayée</span>
-                {% else %}
-                <span class="badge bg-secondary">-</span>
-                {% endif %}
-              </td>
-              <td>{{ row.total }}<span class="devise"></span></td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="3">Aucune commande récente</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Client</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in commandes_recentes %}
+              <tr>
+                <td>
+                  {{ row.client_name }}<br>
+                  <span class="text-muted small">cmd-{{ row.id_commande }}</span>
+                </td>
+                <td>
+                  {% if row.statut == 'payee' %}
+                  <span class="badge bg-success">Payée</span>
+                  {% elif row.statut == 'partielle' %}
+                  <span class="badge bg-warning text-dark">Partielle</span>
+                  {% elif row.statut == 'impayee' %}
+                  <span class="badge bg-danger">Impayée</span>
+                  {% elif row.statut == 'à_livrer' %}
+                  <span class="badge bg-secondary">À livrer</span>
+                  {% else %}
+                  <span class="badge bg-light text-dark">{{ row.statut or 'Inconnu' }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if row.montant_attendu is not none %}
+                  {{ "%.2f"|format(row.montant_attendu) }} <span class="devise">FCFA</span>
+                  {% else %}
+                  —
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="3" class="text-center text-muted">Aucune commande récente</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

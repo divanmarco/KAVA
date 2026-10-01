@@ -59,6 +59,17 @@
                     <span class="badge bg-secondary">-</span>
                     {% endif %}
                 </p>
+                <p class="mb-0"><strong>Action à mener:</strong>
+                    {% if vente.mode_vente == 'comptant' %}
+                    <span class="text-succes">Comptant</span>
+                    {% elif vente.mode_vente == 'credit'%}
+                    <span class="text-danger">Crédit</span>
+                    {% elif vente.mode_vente == 'livraison' %}
+                    <span class="text-secondary">À Livrer</span>
+                    {% else %}
+                    <span>-</span>
+                    {% endif %}
+                </p>
                 {% else %}
                 <p class="text-muted mb-0">Aucune vente associée à cette commande.</p>
                 {% endif %}

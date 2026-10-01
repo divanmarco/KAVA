@@ -42,13 +42,12 @@
         </div>
 
         <div>
-            <label for="statut" class="form-label">Statut</label>
-            <select name="statut" id="statut" class="form-select" required>
+            <label for="mode_de_vente" class="form-label">Mode de Vente</label>
+            <select name="mode_de_vente" id="statut" class="form-select" required>
                 {% for value, label in [
-                ('impayee', 'Impayée'),
-                ('partielle', 'Partielle'),
-                ('payee', 'Payée'),
-                ('a_livrer', 'À livrer')
+                ('comptant', 'Comptant'),
+                ('credit', 'Crédit'),
+                ('livraison', 'À Livrer')
                 ] %}
                 <option value="{{ value }}" {% if commande.statut==value %}selected{% endif %}>
                     {{ label }}

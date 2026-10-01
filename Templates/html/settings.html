@@ -37,10 +37,9 @@
           <p class="form-control-plaintext" id="profileName">{{ current_user.name }}</p>
         </div>
         <div class="col-8 mb-3">
-          <label class="form-label" for="profileName">Email</label>
-          <p class="form-control-plaintext" id="profileName">{{ current_user.email }}</p>
+          <label class="form-label" for="profileName">Mot de passe</label>
+          <p class="form-control-plaintext" id="profileName">••••••••</p>
         </div>
-          <button class="btn btn-gold" type="submit">Enregistrer</button>
       </div>
     </form>
   </div>
@@ -60,9 +59,9 @@
 
       <hr class="sidebar-divider">
 
-      <div class="col-md-6 mb-3">
-        <a class="btn btn-secondary" href="{{ url_for('forgot_password') }}">Changer le mot de passe</a>
-      </div>
+      <a class="btn btn-gold " href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+        Changer le Mot de passe
+      </a>
 
       <hr class="sidebar-divider">
 

@@ -1,6 +1,8 @@
 from decimal import Decimal, InvalidOperation
+from turtle import back
+
+from click import command
 from commande import creer_commande, StockInsuffisant
-from flask_login import current_user, login_required
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
 from config import Config
@@ -14,10 +16,10 @@ import secrets
 from sqlalchemy import or_
 import re
 import os
+from models import Livraison, Commande, Client, User, RoleEnum
 from sqlalchemy import func
 from datetime import datetime
 from models import Commentaire
-from flask_login import login_required, current_user
 from models import Rapport_de_Compte
 
 STATUTS_VALIDES = ('impayee', 'partielle', 'payee', 'a_livrer')
@@ -39,24 +41,81 @@ with app.app_context():
     db.create_all()
 from sqlalchemy import desc
 
+
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
+    ca_total = db.session.query(
+        func.coalesce(func.sum(Ligne_Commande.quantite * Ligne_Commande.prix_unitaire), 0)
+    ).scalar()
+
+    # 2. Nombre total d'articles vendus
+    total_articles = db.session.query(
+        func.coalesce(func.sum(Ligne_Commande.quantite), 0)
+    ).scalar()
+
+    total_clients = db.session.query(
+        func.coalesce(func.count(Client.id_client), 0)
+    ).scalar()
+
+
     commandes_recentes = (
-        db.session.query(
-            Commande.id_commande,
-            Client.name.label('client_name'),
-            Vente.montant_attendu,
-            Vente.montant_percue,
-            Vente.statut,
+            db.session.query(
+                Commande.id_commande,
+                Client.name.label('client_name'),
+                Vente.montant_attendu,
+                Vente.montant_percue,
+                Vente.statut,
+            )
+            .join(Client, Commande.id_client == Client.id_client)
+            .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
+            .order_by(desc(Commande.id_commande))
+            .limit(5)
+            .all()
         )
-        .join(Client, Commande.id_client == Client.id_client)
-        .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
-        .order_by(desc(Commande.id_commande))
-        .limit(5)
+
+    return render_template(
+        'html/index.html',
+        ca_total=float(ca_total),
+        total_articles=int(total_articles),
+        total_clients=int(total_clients),
+        commandes_recentes=commandes_recentes,
+    )
+
+def get_stock_stats():
+    """Pour chaque catégorie : stock actuel, quantité vendue, ratio vendu."""
+    # 1) Stock actuel par catégorie
+    stock_rows = (
+        db.session.query(Produits.categorie, func.coalesce(func.sum(Produits.stock), 0))
+        .group_by(Produits.categorie)
         .all()
     )
-    return render_template('html/index.html', commandes_recentes=commandes_recentes)
+
+    # 2) Quantités vendues par catégorie (somme des lignes de commande)
+    quantite_rows = (
+        db.session.query(Produits.categorie, func.coalesce(func.sum(Ligne_Commande.quantite), 0))
+        .join(Ligne_Commande, Ligne_Commande.id_produit == Produits.id_produit)
+        .group_by(Produits.categorie)
+        .all()
+    )
+    vendu_par_cat = {cat: int(qte) for cat, qte in quantite_rows}
+
+    max_stock = max((int(s) for _, s in stock_rows), default=0) or 1  # évite la division par 0
+
+    stats = []
+    for cat, stock in stock_rows:
+        stock = int(stock)
+        vendu = vendu_par_cat.get(cat, 0)
+        total = stock + vendu
+        stats.append({
+            "label": cat,
+            "stock": stock,
+            "vendu": vendu,
+            "stock_pct": round(stock / max_stock * 100),       
+            "ratio": round(vendu / total * 100) if total else 0,  
+        })
+    return stats
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -94,18 +153,14 @@ def settings():
     return render_template("html/settings.html")
 
 
-
-
 @app.route("/forgot-password.html", methods=["GET", "POST"])
 def forgot_password():
     return render_template("html/forgot-password.html")
 
-
-
-
-@app.route("/profile.html", methods=["GET", "POST"])
+@app.route("/profile.html")
+@login_required
 def profile():
-    return render_template("html/profile.html")
+    return redirect(url_for("index"))
 
 
 # Users Management Routes
@@ -774,13 +829,14 @@ def orders():
             Vente.montant_percue.label("montant_percue"),
             Vente.statut.label("statut"),
             Vente.date_vente.label("date_vente"),
+            Vente.mode_vente.label("mode_de_vente")
         )
     )
     if q:
         query = query.filter(Client.name.ilike(f"%{q}%"))
 
     commandes = query.order_by(Commande.id_commande.desc()).paginate(
-        page=page, per_page=10, error_out=False
+        page=page, per_page=5, error_out=False
     )
     return render_template("html/orders/orders.html", orders=commandes, q=q)
 
@@ -817,48 +873,135 @@ def delivery():
 
     return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
 
-# @app.route("/alerts.html", methods=["GET", "POST"])
-# def blank():
-#     return render_template("html/alerts.html")
+
+@app.route('/delivery/<int:id_livraison>')
+@login_required
+def delivery_details(id_livraison):
+    livraison = Livraison.query.get_or_404(id_livraison)
+    client = Client.query.get(livraison.id_client)
+    livreur = User.query.get(livraison.id_utilisateur)
+
+    return render_template(
+        'html/delivery/delivery_details.html',
+        livraison=livraison,
+        client=client,
+        livreur=livreur
+    )
 
 
+@app.route('/delivery/<int:id_livraison>/delete', methods=['POST'])
+@login_required
+def delete_delivery(id_livraison):
+    livraison = Livraison.query.get_or_404(id_livraison)
+    try:
+        db.session.delete(livraison)
+        db.session.commit()
+        flash("Livraison supprimée avec succès.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Impossible de supprimer cette livraison.", "danger")
 
-# @app.route('/')
+    return redirect(url_for('delivery'))
+
+def _parse_dt(value):
+    """'2026-10-01T14:30' (datetime-local) -> datetime, ou None si vide."""
+    return datetime.strptime(value, "%Y-%m-%dT%H:%M") if value else None
+@app.route('/add_delivery', methods=['GET', 'POST'])
+@login_required
+def add_delivery():
+    commandes = Commande.query.order_by(Commande.id_commande.desc()).all()
+    livreurs = User.query.filter_by(role=RoleEnum.LIVREUR).order_by(User.name).all()  # gardez le nom d'enum que vous avez corrigé
+
+    if request.method == 'POST':
+        commande = Commande.query.get_or_404(request.form['id_commande'])
+        livraison = Livraison(
+            id_commande=commande.id_commande,
+            id_client=commande.id_client,
+            id_utilisateur=request.form['id_utilisateur'],
+            adresse_livraison=request.form['adresse_livraison'].strip(),
+            date_livraison_prevue=_parse_dt(request.form['date_livraison_prevue']),
+            statut=request.form['statut'],
+        )
+        db.session.add(livraison)
+        db.session.commit()
+        flash("Livraison ajoutée avec succès.", "success")
+        return redirect(url_for('delivery'))
+
+    return render_template('html/delivery/add_delivery.html',commandes=commandes, livreurs=livreurs, form={})
+@login_required
+def edit_delivery(id_livraison):
+    livraison = Livraison.query.get_or_404(id_livraison)
+    commandes = Commande.query.order_by(Commande.id_commande.desc()).all()
+    livreurs = User.query.filter_by(role=RoleEnum.LIVREUR).order_by(User.name).all()  # gardez le nom d'enum corrigé
+
+    if request.method == "POST":
+        try:
+            commande = Commande.query.get_or_404(request.form["id_commande"])
+            livraison.id_commande = commande.id_commande
+            livraison.id_client = commande.id_client
+            livraison.id_utilisateur = request.form["id_utilisateur"]
+            livraison.adresse_livraison = request.form["adresse_livraison"].strip()
+            livraison.date_livraison_prevue = _parse_dt(request.form["date_livraison_prevue"])
+            livraison.date_livraison_effective = _parse_dt(request.form.get("date_livraison_effective"))
+            livraison.statut = request.form["statut"]
+            db.session.commit()
+            flash("Livraison mise à jour.", "success")
+            return redirect(url_for("delivery"))
+        except IntegrityError:
+            db.session.rollback()
+            flash("Une erreur est survenue lors de la mise à jour de la livraison.", "danger")
+
+    return render_template("html/delivery/edit_delivery.html", delivery=livraison, commandes=commandes, livreurs=livreurs)
+
+
+@app.route("/delivery/delivery_details/<int:id_livraison>")
+@login_required
+def delivery_details_page(id_livraison):
+    livraison = Livraison.query.get_or_404(id_livraison)
+    client = Client.query.get(livraison.id_client)
+    livreur = User.query.get(livraison.id_utilisateur)
+
+    return render_template(
+        "html/delivery/delivery_details.html",
+        livraison=livraison,
+        client=client,
+        livreur=livreur
+    )
+
+# @app.route("/dashboard.html")
+# @login_required
 # def dashboard():
-#     # 1. KPIs globaux issus de différents modèles
-#     total_clients = Client.query.count()
-#     total_commandes = Commande.query.filter(Commande.statut != 'Annulé').count()
-#     chiffre_affaires = db.session.query(func.sum(Vente.prix_total)).scalar() or 0.0
+#     return render_template("html/dashboard.html")
 
-#     # 2. Top produits (Jointure Vente <-> Produit)
-#     top_produits_data = db.session.query(
-#         product.nom, func.sum(Vente.quantite).label('total_quantite')
-#     ).join(Vente).group_by(product.id).order_by(func.sum(Vente.quantite).desc()).limit(5).all()
+@app.route("/change-password.html", methods=["GET", "POST"])
+@login_required
+def change_password_route():
+    back = request.referrer or url_for("dashboard")
+    if request.method == "POST":
+        old_password = request.form.get("old_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
 
-#     # 3. Performance des Commerciaux (Jointure Commande <-> Utilisateur <-> Vente)
-#     perf_commerciaux = db.session.query(
-#         users.nom, func.sum(Vente.prix_total).label('ca_genere')
-#     ).join(Commande, users.id == Commande.utilisateur_id)\
-#      .join(Vente, Commande.id == Vente.commande_id)\
-#      .group_by(users.id).all()
+        if not old_password or not new_password or not confirm_password:
+            flash("Tous les champs sont obligatoires.", "danger")
+            return redirect(back)
 
-#     # Préparation des données pour le rendu
-#     donnees = {
-#         "kpis": {
-#             "clients": total_clients,
-#             "commandes": total_commandes,
-#             "ca": round(chiffre_affaires, 2)
-#         },
-#         "top_produits": {
-#             "labels": [p[0] for p in top_produits_data],
-#             "valeurs": [p[1] for p in top_produits_data]
-#         },
-#         "commerciaux": {
-#             "labels": [c[0] for c in perf_commerciaux],
-#             "valeurs": [c[1] for c in perf_commerciaux]
-#         }
-#     }
+        if new_password != confirm_password:
+            flash("Les nouveaux mots de passe ne correspondent pas.", "danger")
+            return redirect(back)
 
-#     return render_template('dashboard_complet.html', donnees=donnees)
+        user = User.query.get(current_user.id)
+        if not user or not check_password_hash(user.mot_de_passe, old_password):
+            flash("Le mot de passe actuel est incorrect.", "danger")
+            return redirect(back)
+
+        user.mot_de_passe = generate_password_hash(new_password)
+        db.session.commit()
+        flash("Le mot de passe a été modifié avec succès.", "success")
+        return redirect(back)
+
+    return render_template("html/change-password_route.html")
+
+
 if __name__ == '__main__':
     app.run(debug=True)

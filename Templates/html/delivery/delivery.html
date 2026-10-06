@@ -34,15 +34,17 @@
             <tr>
                 <td>{{ row.Livraison.id }}</td>
                 <td>
-                    <a href="{{ url_for('orders_details', id_commande=row.Livraison.id_commande) }}">
+                    <a href="{{ url_for('orders_details', id_commande=row.Livraison.id_commande) }}"
+                        class="stretched-link text-decoration-none text-dark">
                         #{{ row.Livraison.id_commande }}
                     </a>
                 </td>
-                <td>{{ row.client_name }}</td>
+                <td>{{ row.client.name }}</td>
                 <td>{{ row.livreur_name }}</td>
                 <td>{{ row.Livraison.adresse_livraison }}</td>
                 <td>{{ row.Livraison.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ row.Livraison.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if row.Livraison.date_livraison_effective else '-' }}</td>
+                <td>{{ row.Livraison.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if
+                    row.Livraison.date_livraison_effective else '-' }}</td>
                 <td>
                     {% if row.Livraison.statut == 'livree' %}
                     <span class="badge bg-success">Livrée</span>
@@ -52,11 +54,17 @@
                     <span class="badge bg-warning text-dark">En cours</span>
                     {% endif %}
                 </td>
-                <td class="text-end">
-                    <a class="btn btn-outline-gold btn-sm" title="Voir la commande"
-                        href="{{ url_for('orders_details', id_commande=row.Livraison.id_commande) }}">
-                        <i class="bi bi-eye" aria-hidden="true"></i>
-                    </a>
+                <td class="text-end position-relative" style="z-index: 2;">
+                    <a href="{{ url_for('orders_details', id_commande=row.Livraison.id_commande) }}"
+                        class="btn btn-gold"><i class="bi bi-eye"></i></a>
+                    <a href="{{ url_for('edit_delivery', id_livraison=row.Livraison.id) }}"
+                        class="btn btn-secondary"><i class="bi bi-pencil"></i></a>
+                    <button type="button" class="btn btn-gold delete-product-btn" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal" data-item-name="{{ client.name }}"
+                        data-item-label="Supprimer le Client ?"
+                        data-delete-url="{{ url_for('delete_customer', id_livraison=row.Livraison.id) }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </td>
             </tr>
             {% else %}

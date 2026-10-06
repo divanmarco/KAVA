@@ -73,14 +73,8 @@ def index():
             .limit(5)
             .all()
         )
-
-    return render_template(
-        'html/index.html',
-        ca_total=float(ca_total),
-        total_articles=int(total_articles),
-        total_clients=int(total_clients),
-        commandes_recentes=commandes_recentes,
-    )
+    print(commandes_recentes[0]._fields)
+    return render_template('html/index.html',ca_total=float(ca_total),total_articles=int(total_articles),total_clients=int(total_clients),commandes_recentes=commandes_recentes,)
 
 def get_stock_stats():
     """Pour chaque catégorie : stock actuel, quantité vendue, ratio vendu."""
@@ -618,24 +612,8 @@ def support():
 
     return render_template('html/support.html')
 
-# forgot passzord route
-# @app.route("/change-password", methods=["POST"])
-# @login_required
-# def change_password():
-#     current = request.form.get("current_password")
-#     new = request.form.get("new_password")
-#     confirm = request.form.get("confirm_password")
-
-#     if new != confirm:
-#         flash("Les mots de passe ne correspondent pas.", "error")
-#         return redirect(url_for("settings"))
-
-
-
 
 #gestion des ventes et commandes 
-
-
 def _lignes_commande(id_commande):
     rows = (
         db.session.query(Ligne_Commande, Produits)
@@ -754,11 +732,11 @@ def edit_orders(id_commande):
             return redirect(url_for("edit_orders", id_commande=id_commande))
         commande.id_client = id_client
 
-        statut = request.form.get("statut")
-        if statut not in STATUTS_VALIDES:
-            flash("Statut invalide.", "danger")
-            return redirect(url_for("edit_orders", id_commande=id_commande))
-        commande.statut = statut
+        # statut = request.form.get("statut")
+        # if statut not in STATUTS_VALIDES:
+        #     flash("Statut invalide.", "danger")
+        #     return redirect(url_for("edit_orders", id_commande=id_commande))
+        # commande.statut = statut
 
         if vente:
             try:
@@ -868,7 +846,7 @@ def delivery():
 
     deliveries = (
         query.order_by(Livraison.date_livraison_prevue.desc())
-        .paginate(page=page, per_page=10, error_out=False)
+        .paginate(page=page, per_page=5, error_out=False)
     )
 
     return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
@@ -881,12 +859,7 @@ def delivery_details(id_livraison):
     client = Client.query.get(livraison.id_client)
     livreur = User.query.get(livraison.id_utilisateur)
 
-    return render_template(
-        'html/delivery/delivery_details.html',
-        livraison=livraison,
-        client=client,
-        livreur=livreur
-    )
+    return render_template('html/delivery/delivery_details.html',livraison=livraison,client=client,livreur=livreur)
 
 
 @app.route('/delivery/<int:id_livraison>/delete', methods=['POST'])
@@ -928,6 +901,9 @@ def add_delivery():
         return redirect(url_for('delivery'))
 
     return render_template('html/delivery/add_delivery.html',commandes=commandes, livreurs=livreurs, form={})
+
+
+@app.route('/delivery/<int:id_livraison>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_delivery(id_livraison):
     livraison = Livraison.query.get_or_404(id_livraison)

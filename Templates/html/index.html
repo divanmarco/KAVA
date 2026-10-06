@@ -81,117 +81,63 @@
     </article>
   </div>
 </section>
-<!-- <div class="card">
-            <h3>Articles Vendus</h3>
-            <p>{{ total_articles }}</p>
-        </div>
-        <div class="card">
-            <h3>Top Produit</h3>
-            <p style="color: #27ae60;">{{ produit_star }}</p>
-        </div>
-    </div> -->
 
-<!-- <h2>Détail des Transactions</h2>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Produit</th>
-            <th>Quantité</th>
-            <th>Prix Unitaire</th>
-            <th>Total</th>
-        </tr>
-        {% for v in ventes %}
-        <tr>
-            <td>{{ v.id }}</td>
-            <td>{{ v.produit }}</td>
-            <td>{{ v.quantite }}</td>
-            <td>{{ v.prix_unitaire }} €</td>
-            <td>{{ v.quantite * v.prix_unitaire }} €</td>
-        </tr>
-        {% endfor %}
-    </table> -->
-<!-- <section class="row g-3 mt-1">
-  <div class="col-12 col-xl-8">
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <h2 class="h5 mb-1 section-title"><span>Répartition des stocks</span></h2>
-          <p class="text-muted small mb-0">Barres : stock actuel · Texte : part déjà vendue</p>
-        </div>
-        <a class="btn btn-gold btn-sm" href="{{ url_for('charts') }}">Voir le détails</a>
-      </div>
-
-      <div class="chart-bars" aria-label="Stock et ratio de ventes par catégorie">
-        {% for s in stock_stats %}
-        <div class="chart-column" title="{{ s.label }} : {{ s.stock }} en stock, {{ s.vendu }} vendus">
-          <span style="height: {{ s.stock_pct }}%">
-
-          </span>
-          <small>{{ s.label }}</small>
-          <small class="d-block text-muted">{{ s.ratio }} % vendu</small>
-        </div>
-        {% else %}
-        <p class="text-muted text-center w-100 my-4">Aucune donnée de stock ou de vente.</p>
-        {% endfor %}
-      </div>
+<div class="col-12 col-xl-4">
+  <div class="panel h-100">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-gold">Commandes Récentes</h6>
+      <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout.</a>
     </div>
-  </div> -->
-
-
-  <div class="col-12 col-xl-4">
-    <div class="panel h-100">
-      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-gold">Commandes Récentes</h6>
-        <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout.</a>
-      </div>
-      <div class="panel-body">
-        <div class="table-responsive">
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">Client</th>
-                <th scope="col">Statut</th>
-                <th scope="col">Montant</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in commandes_recentes %}
-              <tr>
-                <td>
-                  {{ row.client_name }}<br>
-                  <span class="text-muted small">cmd-{{ row.id_commande }}</span>
-                </td>
-                <td>
-                  {% if row.statut == 'payee' %}
-                  <span class="badge bg-success">Payée</span>
-                  {% elif row.statut == 'partielle' %}
-                  <span class="badge bg-warning text-dark">Partielle</span>
-                  {% elif row.statut == 'impayee' %}
-                  <span class="badge bg-danger">Impayée</span>
-                  {% elif row.statut == 'à_livrer' %}
-                  <span class="badge bg-secondary">À livrer</span>
-                  {% else %}
-                  <span class="badge bg-light text-dark">{{ row.statut or 'Inconnu' }}</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if row.montant_attendu is not none %}
-                  {{ "%.2f"|format(row.montant_attendu) }} <span class="devise">FCFA</span>
-                  {% else %}
-                  —
-                  {% endif %}
-                </td>
-              </tr>
-              {% else %}
-              <tr>
-                <td colspan="3" class="text-center text-muted">Aucune commande récente</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Client</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Montant</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in commandes_recentes %}
+            <tr>
+              <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}">
+                  <td>
+                {{ row.client_name }}<br>
+                <span class="text-muted small">cmd-{{ row.id_commande }}</span>
+              </td>
+              </a>
+              <td>
+                {% if row.statut == 'payee' %}
+                <span class="badge bg-success">Payée</span>
+                {% elif row.statut == 'partielle' %}
+                <span class="badge bg-warning text-dark">Partielle</span>
+                {% elif row.statut == 'impayee' %}
+                <span class="badge bg-danger">Impayée</span>
+                {% elif row.statut == 'à_livrer' %}
+                <span class="badge bg-secondary">À livrer</span>
+                {% else %}
+                <span class="badge bg-light text-dark">{{ row.statut or 'Inconnu' }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if row.montant_attendu is not none %}
+                {{ "%.2f"|format(row.montant_attendu) }} <span class="devise">FCFA</span>
+                {% else %}
+                —
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center text-muted">Aucune commande récente</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 </section>
 {% endblock %}

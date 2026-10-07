@@ -1,6 +1,6 @@
 {% extends "html/layout.html" %}
 
-{% block title %}Vue d'ensemble | adminHMD{% endblock %}
+{% block title %}Vue d'ensemble{% endblock %}
 
 {% block page_icon %}
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2"
@@ -50,6 +50,7 @@
     </article>
   </div>
 
+
   <div class="col-12 col-sm-6 col-xl-3">
     <article class="metric-card metric-danger">
       <div class="metric-top">
@@ -64,8 +65,14 @@
           </svg>
         </span>
       </div>
-      <div class="metric-value text-danger">7</div>
-      <div class="metric-meta"><span>Produits sous le seuil</span></div>
+      <div class="metric-value text-danger">{{ produits_alerte|length }}</div>
+      <div class="metric-meta">
+        {% if produits_alerte %}
+        Plus critique : {{ produits_alerte[0].name }}
+        {% else %}
+        Aucune alerte
+        {% endif %}
+      </div>
     </article>
   </div>
 
@@ -100,13 +107,14 @@
           </thead>
           <tbody>
             {% for row in commandes_recentes %}
-            <tr>
-              <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}">
-                  <td>
-                {{ row.client_name }}<br>
-                <span class="text-muted small">cmd-{{ row.id_commande }}</span>
+            <tr class="position-relative">
+              <td>
+                <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}" 
+                class="stretched-link text-decoration-none text-dark">
+                  {{ row.client_name }}<br>
+                  <span class="text-muted small">cmd-{{ row.id_commande }}</span>
+                </a>
               </td>
-              </a>
               <td>
                 {% if row.statut == 'payee' %}
                 <span class="badge bg-success">Payée</span>

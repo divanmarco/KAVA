@@ -1,7 +1,4 @@
 from decimal import Decimal, InvalidOperation
-from turtle import back
-
-from click import command
 from commande import creer_commande, StockInsuffisant
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
@@ -14,8 +11,6 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 import secrets
 from sqlalchemy import or_
-import re
-import os
 from models import Livraison, Commande, Client, User, RoleEnum
 from sqlalchemy import func
 from datetime import datetime
@@ -23,6 +18,7 @@ from models import Commentaire
 from models import Rapport_de_Compte
 
 STATUTS_VALIDES = ('impayee', 'partielle', 'payee', 'a_livrer')
+SEUIL_ALERTE = 5
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/kava'
@@ -74,13 +70,19 @@ def index():
             .all()
         )
     print(commandes_recentes[0]._fields)
-    return render_template('html/index.html',ca_total=float(ca_total),total_articles=int(total_articles),total_clients=int(total_clients),commandes_recentes=commandes_recentes,)
+    return render_template('html/index.html',
+            ca_total=float(ca_total),
+            total_articles=int(total_articles),
+            total_clients=int(total_clients),
+            commandes_recentes=commandes_recentes,
+            produits_alerte = get_produits_sous_seuil())
 
 def get_stock_stats():
-    """Pour chaque catégorie : stock actuel, quantité vendue, ratio vendu."""
-    # 1) Stock actuel par catégorie
     stock_rows = (
-        db.session.query(Produits.categorie, func.coalesce(func.sum(Produits.stock), 0))
+        db.session.query(
+            Produits.categorie,
+            func.coalesce(func.sum(Produits.quantite_en_stock), 0),
+        )
         .group_by(Produits.categorie)
         .all()
     )
@@ -110,6 +112,13 @@ def get_stock_stats():
         })
     return stats
 
+def get_produits_sous_seuil():
+    return (
+        Produits.query
+        .filter(Produits.quantite_en_stock <= SEUIL_ALERTE)
+        .order_by(Produits.quantite_en_stock.asc())
+        .all()
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -798,18 +807,21 @@ def orders():
     q = request.args.get("q", "", type=str).strip()
 
     query = (
-        Commande.query
-        .join(Client, Commande.id_client == Client.id_client)
-        .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
-        .add_columns(
-            Client.name.label("client_name"),
-            Vente.montant_attendu.label("montant_attendu"),
-            Vente.montant_percue.label("montant_percue"),
-            Vente.statut.label("statut"),
-            Vente.date_vente.label("date_vente"),
-            Vente.mode_vente.label("mode_de_vente")
-        )
+    Commande.query
+    .join(Client, Commande.id_client == Client.id_client)
+    .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
+    .outerjoin(Livraison, Livraison.id_commande == Commande.id_commande)
+    .add_columns(
+        Client.name.label("client_name"),
+        Vente.montant_attendu.label("montant_attendu"),
+        Vente.montant_percue.label("montant_percue"),
+        Vente.statut.label("statut"),
+        Vente.date_vente.label("date_vente"),
+        Vente.mode_vente.label("mode_de_vente"),
+        Livraison.id.label("id_livraison"),
     )
+)
+    
     if q:
         query = query.filter(Client.name.ilike(f"%{q}%"))
 
@@ -823,43 +835,29 @@ def orders():
 @app.route('/delivery')
 @login_required
 def delivery():
-    page = request.args.get('page', 1, type=int)
-    q = request.args.get('q', '').strip()
+    page = request.args.get("page", 1, type=int)
+    q = request.args.get("q", "", type=str).strip()
 
     query = (
         db.session.query(
-            Livraison,
-            Client.name.label('client_name'),
-            User.name.label('livreur_name'),
+            Livraison.id,
+            Livraison.id_commande,
+            Livraison.adresse_livraison,
+            Livraison.date_livraison_prevue,
+            Livraison.date_livraison_effective,
+            Livraison.statut,
+            Client.name.label("client_name"),
         )
         .join(Client, Livraison.id_client == Client.id_client)
-        .join(User, Livraison.id_utilisateur == User.id)
     )
-
     if q:
-        query = query.filter(
-            or_(
-                Client.name.ilike(f'%{q}%'),
-                User.name.ilike(f'%{q}%'),
-            )
-        )
+        query = query.filter(Client.name.ilike(f"%{q}%"))
 
-    deliveries = (
-        query.order_by(Livraison.date_livraison_prevue.desc())
-        .paginate(page=page, per_page=5, error_out=False)
+    deliveries = query.order_by(Livraison.id.desc()).paginate(
+        page=page, per_page=5, error_out=False
     )
-
     return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
 
-
-@app.route('/delivery/<int:id_livraison>')
-@login_required
-def delivery_details(id_livraison):
-    livraison = Livraison.query.get_or_404(id_livraison)
-    client = Client.query.get(livraison.id_client)
-    livreur = User.query.get(livraison.id_utilisateur)
-
-    return render_template('html/delivery/delivery_details.html',livraison=livraison,client=client,livreur=livreur)
 
 
 @app.route('/delivery/<int:id_livraison>/delete', methods=['POST'])
@@ -879,6 +877,8 @@ def delete_delivery(id_livraison):
 def _parse_dt(value):
     """'2026-10-01T14:30' (datetime-local) -> datetime, ou None si vide."""
     return datetime.strptime(value, "%Y-%m-%dT%H:%M") if value else None
+
+
 @app.route('/add_delivery', methods=['GET', 'POST'])
 @login_required
 def add_delivery():

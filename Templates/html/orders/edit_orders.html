@@ -41,15 +41,14 @@
             {% endif %}
         </div>
 
-        <div>
-            <label for="mode_de_vente" class="form-label">Mode de Vente</label>
-            <select name="mode_de_vente" id="statut" class="form-select" required>
+        <div class="col-md-6">
+            <label for="mode_vente" class="form-label">Action à mener</label>
+            <select name="mode_vente" id="mode_vente" class="form-select" required>
                 {% for value, label in [
-                ('comptant', 'Comptant'),
-                ('credit', 'Crédit'),
-                ('livraison', 'À Livrer')
+                ('a_servir', 'À servir'),
+                ('a_livrer', 'À livrer')
                 ] %}
-                <option value="{{ value }}" {% if commande.statut==value %}selected{% endif %}>
+                <option value="{{ value }}" {% if vente and vente.mode_vente==value %}selected{% endif %}>
                     {{ label }}
                 </option>
                 {% endfor %}

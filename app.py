@@ -16,9 +16,8 @@ from sqlalchemy import func
 from datetime import datetime
 from models import Commentaire
 from models import Rapport_de_Compte
+from constants import STATUTS_VENTE, MODES_VENTE,SEUIL_ALERTE
 
-STATUTS_VALIDES = ('impayee', 'partielle', 'payee', 'a_livrer')
-SEUIL_ALERTE = 5
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/kava'
@@ -45,7 +44,6 @@ def index():
         func.coalesce(func.sum(Ligne_Commande.quantite * Ligne_Commande.prix_unitaire), 0)
     ).scalar()
 
-    # 2. Nombre total d'articles vendus
     total_articles = db.session.query(
         func.coalesce(func.sum(Ligne_Commande.quantite), 0)
     ).scalar()
@@ -87,7 +85,7 @@ def get_stock_stats():
         .all()
     )
 
-    # 2) Quantités vendues par catégorie (somme des lignes de commande)
+
     quantite_rows = (
         db.session.query(Produits.categorie, func.coalesce(func.sum(Ligne_Commande.quantite), 0))
         .join(Ligne_Commande, Ligne_Commande.id_produit == Produits.id_produit)
@@ -186,7 +184,7 @@ def add_user():
             flash("L'email est obligatoire.", "danger")
             return render_template("html/users/add-user.html")
 
-        if not telephone:
+        if not telephone.isdigit() or len(telephone) != 9:
             flash("Le numéro de téléphone est obligatoire.", "danger")
             return render_template("html/users/add-user.html")
 
@@ -635,7 +633,7 @@ def _lignes_commande(id_commande):
         quantite = ligne.quantite or 0
         prix = ligne.prix_unitaire or 0
         lignes.append({
-            "produit": produit.name,  # <-- À ADAPTER (name ? nom ? libelle ?)
+            "produit": produit.name,  
             "quantite": quantite,
             "prix_unitaire": prix,
             "sous_total": quantite * prix,
@@ -652,7 +650,8 @@ def _calculer_statut(attendu, percue):
         return "partielle"
     return "impayee"
 
- 
+
+# orders roads
 @app.route("/add_orders.html", methods=["GET", "POST"])
 @login_required
 def add_orders():
@@ -670,7 +669,7 @@ def add_orders():
             flash("Le client est obligatoire.", "danger")
             return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
-        if mode_vente not in ("comptant", "credit", "livraison"):
+        if mode_vente not in MODES_VENTE:
             flash("Le mode de vente est obligatoire.", "danger")
             return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
@@ -692,6 +691,7 @@ def add_orders():
                 mode_vente=mode_vente,
                 montant_percue=montant_percue,
             )
+
         except StockInsuffisant as e:
             flash(str(e), "danger")
             return render_template("html/orders/add_orders.html", customers=customers, products=products)
@@ -725,8 +725,6 @@ def orders_details(id_commande):
         total=total,
     )
 
-
-
 @app.route("/orders/edit/<int:id_commande>", methods=["GET", "POST"])
 @login_required
 def edit_orders(id_commande):
@@ -741,13 +739,12 @@ def edit_orders(id_commande):
             return redirect(url_for("edit_orders", id_commande=id_commande))
         commande.id_client = id_client
 
-        # statut = request.form.get("statut")
-        # if statut not in STATUTS_VALIDES:
-        #     flash("Statut invalide.", "danger")
-        #     return redirect(url_for("edit_orders", id_commande=id_commande))
-        # commande.statut = statut
-
         if vente:
+            mode_vente = request.form.get("mode_vente")
+            if mode_vente not in MODES_VENTE:
+                flash("Action à mener invalide.", "danger")
+                return redirect(url_for("edit_orders", id_commande=id_commande))
+            vente.mode_vente = mode_vente
             try:
                 percue = Decimal(request.form.get("montant_percue", "0") or "0")
             except InvalidOperation:
@@ -840,25 +837,28 @@ def delivery():
 
     query = (
         db.session.query(
-            Livraison.id,
-            Livraison.id_commande,
+            Commande.id_commande,
+            Client.name.label("client_name"),
+            Livraison.id.label("id_livraison"),
             Livraison.adresse_livraison,
             Livraison.date_livraison_prevue,
             Livraison.date_livraison_effective,
             Livraison.statut,
-            Client.name.label("client_name"),
+            User.name.label("livreur_name"),
         )
-        .join(Client, Livraison.id_client == Client.id_client)
+        .join(Vente, Vente.id_commande == Commande.id_commande)
+        .join(Client, Commande.id_client == Client.id_client)
+        .outerjoin(Livraison, Livraison.id_commande == Commande.id_commande)
+        .outerjoin(User, Livraison.id_utilisateur == User.id)
+        .filter(Vente.mode_vente == "a_livrer")
     )
     if q:
         query = query.filter(Client.name.ilike(f"%{q}%"))
 
-    deliveries = query.order_by(Livraison.id.desc()).paginate(
+    deliveries = query.order_by(Commande.id_commande.desc()).paginate(
         page=page, per_page=5, error_out=False
     )
     return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
-
-
 
 @app.route('/delivery/<int:id_livraison>/delete', methods=['POST'])
 @login_required

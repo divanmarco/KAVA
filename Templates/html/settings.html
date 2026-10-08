@@ -26,14 +26,13 @@
               <path
                 d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
             </svg>
-            <span>Profil de l'utilisateur</span>
+            <span>Profil de l'utilisateur ({{current_user.role.value}})</span>
           </h2>
         </div>
       </div>
-
       <div class="col-12 col-xl-8">
-        <div class="col-8 mb-3">
-          <label class="form-label" for="profileName">Nom complet</label>
+        <div class="col-8 mb-5">
+          <label class="form-label" for="profileName">Nom</label>
           <p class="form-control-plaintext" id="profileName">{{ current_user.name }}</p>
         </div>
         <div class="col-8 mb-3">
@@ -56,14 +55,13 @@
           <span>Sécurité</span>
         </h2>
       </div>
-      <hr class="sidebar-divider">
-      <a class="btn btn-gold " href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+      <a class="btn btn-gold" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
         Changer le Mot de passe
       </a>
     </div>
   </div>
-
-  <div class="col-12 col-xl-5">
+  
+  <!-- <div class="col-12 col-xl-5">
     <div class="panel h-100">
       <div>
         <h2 class="h5 mb-1 section-title">
@@ -94,7 +92,70 @@
         </select>
       </div>
     </div>
-  </div>
+  </div> -->
 
 </section>
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('change_password_route') }}" id="changePasswordForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i cla  ss="bi bi-key" aria-hidden="true"></i> Changer le mot de passe
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="cpOld">Mot de passe actuel</label>
+                        <input type="password" name="old_password" id="cpOld" class="form-control"
+                            autocomplete="current-password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="cpNew">Nouveau mot de passe</label>
+                        <input type="password" name="new_password" id="cpNew" class="form-control"
+                            autocomplete="new-password" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label" for="cpConfirm">Confirmer le nouveau mot de passe</label>
+                        <input type="password" name="confirm_password" id="cpConfirm" class="form-control"
+                            autocomplete="new-password" required>
+                        <div class="invalid-feedback">Les mots de passe ne correspondent pas.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                        data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-outline-gold btn-sm">
+                        <i class="bi bi-check-lg" aria-hidden="true"></i> Modifier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var form = document.getElementById('changePasswordForm');
+        var pwd = document.getElementById('cpNew');
+        var confirm = document.getElementById('cpConfirm');
+        form.addEventListener('submit', function (e) {
+            if (pwd.value !== confirm.value) {
+                e.preventDefault();
+                confirm.classList.add('is-invalid');
+            }
+        });
+        confirm.addEventListener('input', function () {
+            confirm.classList.remove('is-invalid');
+        });
+        document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
+            form.reset();
+            confirm.classList.remove('is-invalid');
+        });
+    })();
+</script>
 {% endblock %}

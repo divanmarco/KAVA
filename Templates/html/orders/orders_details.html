@@ -48,24 +48,24 @@
                 <p class="mb-1"><strong>Reste à payer :</strong>
                     {{ (vente.montant_attendu or 0) - (vente.montant_percue or 0) }}
                 </p>
-                <p class="mb-0"><strong>Statut :</strong>
+                                <p class="mb-0"><strong>Statut :</strong>
                     {% if vente.statut == 'payee' %}
-                    <span class="badge bg-success">Payée</span>
+                    <span class="badge bg-success">Comptant</span>
                     {% elif vente.statut == 'partielle' %}
                     <span class="badge bg-warning text-dark">Partielle</span>
                     {% elif vente.statut == 'impayee' %}
-                    <span class="badge bg-danger">Impayée</span>
+                    <span class="badge bg-danger">Crédit</span>
                     {% else %}
                     <span class="badge bg-secondary">-</span>
                     {% endif %}
                 </p>
-                <p class="mb-0"><strong>Action à mener:</strong>
-                    {% if vente.mode_vente == 'comptant' %}
-                    <span class="text-succes">Comptant</span>
-                    {% elif vente.mode_vente == 'credit'%}
-                    <span class="text-danger">Crédit</span>
-                    {% elif vente.mode_vente == 'livraison' %}
-                    <span class="text-secondary">À Livrer</span>
+                <p class="mb-0"><strong>Action à mener :</strong>
+                    {% if vente.statut != 'payee' %}
+                    <span class="text-warning">En attente de paiement</span>
+                    {% elif vente.mode_vente == 'a_livrer' %}
+                    <span class="text-secondary">À livrer</span>
+                    {% elif vente.mode_vente == 'a_servir' %}
+                    <span class="text-success">À servir</span>
                     {% else %}
                     <span>-</span>
                     {% endif %}

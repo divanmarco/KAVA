@@ -23,11 +23,11 @@
     <input type="email" class="form-control" id="email" name="email" required>
   </div>
   <div class="mb-3">
-    <label for="telephone" class="form-label">Téléphone<span class="text-danger">*</span></label>
-    <input type="text" class="form-control" id="telephone" name="telephone" required>
+    <label for="telephone" class="form-label">Numéro de téléphone<span class="text-danger">*</span></label>
+    <input type="tel" name="telephone" class="form-control" pattern="[0-9]{9}" maxlength="9" required>
   </div>
   <div class="mb-3">
-    <label for="ville" class="form-label">Ville</label>
+    <label for="ville" class="form-label">Ville<span class="text-danger">*</span></label>
     <input type="text" class="form-control" id="ville" name="ville" required>
   </div>
   <div class="mb-3">
@@ -36,13 +36,13 @@
   </div>
   <div class="mb-3">
     <label for="role" class="form-label">Rôle<span class="text-danger">*</span></label>
-<select class="form-select" id="role" name="role" required>
-    <option value="Gérant">Gérant</option>
-    <option value="Caissier">Caissier</option>
-    <option value="Serveur">Serveur</option>
-    <option value="Livreur">Livreur</option>
-    <option value="DAF">DAF</option>
-</select>
+    <select class="form-select" id="role" name="role" required>
+      <option value="Gérant">Gérant</option>
+      <option value="Caissier">Caissier</option>
+      <option value="Serveur">Serveur</option>
+      <option value="Livreur">Livreur</option>
+      <option value="DAF">DAF</option>
+    </select>
   </div>
   <div class="mb-3">
     <label for="status" class="form-label">Statut</label>

@@ -56,8 +56,8 @@
             <label for="statut" class="form-label">Statut</label>
             <select name="statut" id="statut" class="form-select" required>
                 <option value="en_cours" {% if form.statut in (None, 'en_cours') %}selected{% endif %}>En cours</option>
-                <option value="livree" {% if form.statut == 'livree' %}selected{% endif %}>Livrée</option>
-                <option value="annulee" {% if form.statut == 'annulee' %}selected{% endif %}>Annulée</option>
+                <!-- <option value="livree" {% if form.statut == 'livree' %}selected{% endif %}>Livrée</option>
+                <option value="annulee" {% if form.statut == 'annulee' %}selected{% endif %}>Annulée</option> -->
             </select>
         </div>
 

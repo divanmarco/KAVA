@@ -7,7 +7,7 @@
 {% block page_subtitle %}Choisissez le client et les produits vendus.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary btn-sm" href="{{ url_for('add_customer') }}">
+<a class="btn btn-gold" href="{{ url_for('add_customer') }}">
     <i class="bi bi-person-plus"></i> Nouveau client
 </a>
 {% endblock %}
@@ -24,68 +24,136 @@
         </select>
     </div>
 
-    <label class="form-label">Produits</label>
-    <div id="lignes">
-        <div class="row g-2 mb-2 ligne-produit">
-            <div class="col-md-7">
-                <select class="form-select" name="id_produit" required>
-                    <option value="">Choisir un produit</option>
-                    {% for product in products %}
-                    <option value="{{ product.id_produit }}">
-                        {{ product.name }} - {{ product.prix_de_vente }} ({{ product.quantite_en_stock }} en stock)
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <input class="form-control" type="number" name="quantite" min="1" value="1" required>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-outline-danger w-100 supprimer-ligne">
-                    <i class="bi bi-trash"></i>
-                </button>
+    <div>
+        <label class="form-label">Produits</label>
+        <div id="lignes">
+            <div class="row g-2 mb-2 ligne-produit">
+                <div class="col-md-7">
+                    <select class="form-select" name="id_produit" required>
+                        <option value="">Choisir un produit</option>
+                        {% for product in products %}
+                        <option value="{{ product.id_produit }}" data-prix="{{ product.prix_de_vente }}"
+                            data-nom="{{ product.name }}">
+                            {{ product.name }} - {{ product.prix_de_vente }} ({{ product.quantite_en_stock }} en stock)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input class="form-control" type="number" name="quantite" min="1" value="1" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger w-100 supprimer-ligne">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-    <button type="button" id="ajouter-ligne" class="btn btn-outline-gold btn-sm mb-3">
-        <i class="bi bi-plus-circle"></i> Ajouter un produit
-    </button>
+        <button type="button" id="ajouter-ligne" class="btn btn-gold mb-4">
+            <i class="bi bi-plus-circle"></i> Ajouter un produit
+        </button>
 
-    <div class="mb-3">
-        <label for="mode_vente" class="form-label">Mode de vente</label>
-        <select class="form-select" id="mode_vente" name="mode_vente" required>
-            <option value="">Choisir un mode</option>
-            <option value="comptant">Comptant</option>
-            <option value="credit">Crédit</option>
-        </select>
-    </div>
+        <div class="mb-3">
+            <label for="montant_percue" class="form-label">Montant perçu</label>
+            <input class="form-control" type="number" id="montant_percue" name="montant_percue" step="0.01" min="0"
+                value="0">
+        </div>
 
-    <div class="mb-3">
-        <label for="montant_percue" class="form-label">Montant perçu</label>
-        <input class="form-control" type="number" id="montant_percue" name="montant_percue" step="0.01" min="0" value="0">
-    </div>
+        <div class="mb-3">
+            <label for="mode_vente" class="form-label">Action à mener</label>
+            <select class="form-select" id="mode_vente" name="mode_vente" required>
+                <option value="">Choisir une action</option>
+                <option value="a_servir">À servir</option>
+                <option value="a_livrer">À livrer</option>
+            </select>
+        </div>
 
+        <div class="card-body">
+            <h2 class="h6 mb-2">Détail de la vente</h2>
+            <table class="table table-sm mb-2">
+                <tbody id="detail-lignes"></tbody>
+            </table>
+            <p class="mb-1"><strong>Total :</strong> <span id="calc-total">0</span></p>
+            <p class="mb-1"><strong>Perçu :</strong> <span id="calc-percue">0</span></p>
+            <p class="mb-1"><strong>Reste à payer :</strong> <span id="calc-reste">0</span></p>
+            <p class="mb-1"><strong>Remboursement :</strong> <span id="calc-rembours">0</span></p>
+        </div>
+    </div><br>
     <button type="submit" class="btn btn-gold">Enregistrer la commande</button>
 </form>
 {% endblock %}
-
 {% block scripts %}
 <script>
     const lignes = document.getElementById("lignes");
+    const percueInput = document.getElementById("montant_percue");
 
-    document.getElementById("ajouter-ligne").addEventListener("click",
-     function () {
+    function fmt(n) {
+        return n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+    }
+
+    function cellule(texte, droite) {
+        const td = document.createElement("td");
+        td.textContent = texte;
+        if (droite) td.className = "text-end";
+        return td;
+    }
+
+    function recalculer() {
+        const corps = document.getElementById("detail-lignes");
+        corps.innerHTML = "";
+        let total = 0;
+
+        lignes.querySelectorAll(".ligne-produit").forEach(function (ligne) {
+            const select = ligne.querySelector("select");
+            const option = select.options[select.selectedIndex];
+            const prix = parseFloat(option.dataset.prix);
+            const qte = parseInt(ligne.querySelector("input").value, 10);
+            if (isNaN(prix) || isNaN(qte) || qte < 1) return;
+
+            const sous = prix * qte;
+            total += sous;
+            const tr = document.createElement("tr");
+            tr.appendChild(cellule(option.dataset.nom, false));
+            tr.appendChild(cellule(fmt(qte) + " × " + fmt(prix), true));
+            tr.appendChild(cellule("= " + fmt(sous), true));
+            corps.appendChild(tr);
+        });
+
+        const percue = parseFloat(percueInput.value) || 0;
+        const reste = Math.max(total - percue, 0);
+        const rembours = Math.max(percue - total, 0);
+
+        document.getElementById("calc-total").textContent = fmt(total);
+        document.getElementById("calc-percue").textContent = fmt(percue);
+        document.getElementById("calc-reste").textContent = fmt(reste);
+        document.getElementById("calc-rembours").textContent = fmt(rembours);
+
+        let statut = "Crédit";
+        if (total > 0 && percue >= total) statut = "Comptant";
+        else if (percue > 0) statut = "Partielle";
+        document.getElementById("calc-statut").textContent = statut;
+    }
+
+    document.getElementById("ajouter-ligne").addEventListener("click", function () {
         const copie = lignes.querySelector(".ligne-produit").cloneNode(true);
         copie.querySelector("select").selectedIndex = 0;
         copie.querySelector("input").value = 1;
         lignes.appendChild(copie);
+        recalculer();
     });
 
     lignes.addEventListener("click", function (e) {
         const bouton = e.target.closest(".supprimer-ligne");
         if (bouton && lignes.querySelectorAll(".ligne-produit").length > 1) {
             bouton.closest(".ligne-produit").remove();
+            recalculer();
         }
     });
+
+    lignes.addEventListener("input", recalculer);
+    lignes.addEventListener("change", recalculer);
+    percueInput.addEventListener("input", recalculer);
+
+    recalculer();
 </script>
 {% endblock %}

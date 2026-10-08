@@ -9,6 +9,7 @@ from extensions import db, login
 import enum
 import secrets
 import string
+from constants import STATUTS_VENTE, MODES_VENTE
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -106,7 +107,6 @@ class Ligne_Commande(db.Model):
     quantite = db.Column(db.Integer, nullable=False, default=1, server_default="1")
     prix_unitaire = db.Column(db.Numeric(10, 2), nullable=False, default=0, server_default="0")
 
-
 class Vente(db.Model):
     __tablename__ = "vente"
 
@@ -115,12 +115,12 @@ class Vente(db.Model):
     montant_percue = db.Column(db.Numeric(10, 2), nullable=False)
     montant_attendu = db.Column(db.Numeric(10, 2), nullable=False)
     statut = db.Column(
-        db.Enum("payee", "partielle", "impayee", name="statut_vente_enum"),
+        db.Enum(*STATUTS_VENTE, name="statut_vente_enum"),
         nullable=False,
         default="impayee"
     )
     mode_vente = db.Column(
-        db.Enum("comptant", "credit", "livraison", name="mode_vente_enum"),
+        db.Enum(*MODES_VENTE, name="mode_vente_enum"),
         nullable=False
     )
     id_utilisateur = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)

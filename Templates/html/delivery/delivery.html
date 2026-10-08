@@ -31,8 +31,8 @@
         </thead>
         <tbody>
             {% for row in deliveries.items %}
-            <tr>
-                <td>{{ row.id }}</td>
+            <tr class="position-relative">
+                <td>{{ row.id_livraison or '-' }}</td>
                 <td>
                     <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}"
                         class="stretched-link text-decoration-none text-dark">
@@ -40,13 +40,16 @@
                     </a>
                 </td>
                 <td>{{ row.client_name }}</td>
-                <td>{{ row.livreur_name }}</td>
-                <td>{{ row.adresse_livraison }}</td>
-                <td>{{ row.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>{{ row.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if
-                    row.date_livraison_effective else '-' }}</td>
+                <td>{{ row.livreur_name or '-' }}</td>
+                <td>{{ row.adresse_livraison or '-' }}</td>
+                <td>{{ row.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') if row.date_livraison_prevue else '-' }}
+                </td>
+                <td>{{ row.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if row.date_livraison_effective else '-'
+                    }}</td>
                 <td>
-                    {% if row.statut == 'livree' %}
+                    {% if not row.id_livraison %}
+                    <span class="badge bg-secondary">À planifier</span>
+                    {% elif row.statut == 'livree' %}
                     <span class="badge bg-success">Livrée</span>
                     {% elif row.statut == 'annulee' %}
                     <span class="badge bg-danger">Annulée</span>
@@ -55,20 +58,27 @@
                     {% endif %}
                 </td>
                 <td class="text-end position-relative" style="z-index: 2;">
-                    <a href="{{ url_for('delivery_details_page', id_livraison=row.id) }}" class="btn btn-gold">
+                    {% if row.id_livraison %}
+                    <a href="{{ url_for('delivery_details_page', id_livraison=row.id_livraison) }}"
+                        class="btn btn-gold">
                         <i class="bi bi-eye"></i>
                     </a>
-
-                    <a href="{{ url_for('edit_delivery', id_livraison=row.id) }}" class="btn btn-secondary">
+                    <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary">
                         <i class="bi bi-pencil"></i>
                     </a>
-
                     <button type="button" class="btn btn-gold delete-product-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal" data-item-name="Livraison n° {{ row.id }} ({{ row.client_name }})"
+                        data-bs-target="#deleteModal"
+                        data-item-name="Livraison n° {{ row.id_livraison }} ({{ row.client_name }})"
                         data-item-label="Supprimer la livraison ?"
-                        data-delete-url="{{ url_for('delete_delivery', id_livraison=row.id) }}">
+                        data-delete-url="{{ url_for('delete_delivery', id_livraison=row.id_livraison) }}">
                         <i class="bi bi-trash"></i>
                     </button>
+                    {% else %}
+                    <a href="{{ url_for('add_delivery', id_commande=row.id_commande) }}"
+                        class="btn btn-gold">
+                        <i class="bi bi-calendar-plus"></i>
+                    </a>
+                    {% endif %}
                 </td>
             </tr>
             {% else %}

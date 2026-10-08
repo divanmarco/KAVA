@@ -30,8 +30,9 @@
                 <th class="text-end">Montant attendu</th>
                 <th class="text-end">Montant perçu</th>
                 <th class="text-end">Reste à payer</th>
+                <th class="text-end">Remboursement</th>
                 <th class="text-center">Statut</th>
-                <th class="text-center">Mode de vente</th>
+                <th class="text-center">Action à mener</th>
                 <th class="text-end">Action</th>
             </tr>
         </thead>
@@ -51,43 +52,44 @@
                 <td class="text-end">{{ attendu }}</td>
                 <td class="text-end">{{ percue }}</td>
                 <td class="text-end">{{ attendu - percue }}</td>
+                <td class="text-end">{{ [percue - attendu, 0] | max }}</td>
+
                 <td class="text-center">
                     {% if row.statut == 'payee' %}
-                    <span class="text-success">Payée</span>
+                    <span class="text-success">Comptant</span>
                     {% elif row.statut == 'partielle' %}
                     <span class="text-warning">Partielle</span>
-                    {% elif row.statut == 'impayee' %}
-                    <span class="text-danger">Impayée</span>
                     {% else %}
-                    <span class="text-secondary">À Livrer</span>
-                    {% endif %}
-                </td>
-                <td class="text-center">
-                    {% if row.mode_de_vente == 'comptant' %}
-                    <span class="text-success">Comptant</span>
-                    {% elif row.mode_de_vente == 'credit' %}
                     <span class="text-danger">Crédit</span>
-                    {% elif row.mode_de_vente == 'livraison' %}
-                    <span class="text-secondary">À Livrer</span>
-                    {% else %}
-                    <span class="badge bg-secondary">Autre</span>
                     {% endif %}
                 </td>
+
+                <td class="text-center">
+                    {% if row.statut != 'payee' %}
+                    <span class="text-warning">En attente de paiement</span>
+                    {% elif row.mode_de_vente == 'a_livrer' %}
+                    <span class="text-secondary">À livrer</span>
+                    {% elif row.mode_de_vente == 'a_servir' %}
+                    <span class="text-success">À servir</span>
+                    {% else %}
+                    <span class="badge bg-secondary">-</span>
+                    {% endif %}
+                </td>
+                
                 <td class="text-end position-relative" style="z-index: 2;">
                     <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
                         class="btn btn-gold"><i class="bi bi-eye"></i></a>
 
-                    {% if row.id_livraison %}
-                    <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary"><i
-                            class="bi bi-pencil"></i></a>
+                    <a href="{{ url_for('edit_orders', id_commande=row.Commande.id_commande) }}"
+                        class="btn btn-secondary"><i class="bi bi-pencil"></i></a>
 
                     <button type="button" class="btn btn-gold delete-product-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal" data-item-name="Livraison n° {{ row.id_livraison }}"
-                        data-item-label="Supprimer la livraison ?"
-                        data-delete-url="{{ url_for('delete_delivery', id_livraison=row.id_livraison) }}">
+                        data-bs-target="#deleteModal"
+                        data-item-name="Commande n° {{ row.Commande.id_commande }} ({{ row.client_name }})"
+                        data-item-label="Supprimer la commande ?"
+                        data-delete-url="{{ url_for('delete_orders', id_commande=row.Commande.id_commande) }}">
                         <i class="bi bi-trash"></i>
                     </button>
-                    {% endif %}
                 </td>
             </tr>
             {% else %}

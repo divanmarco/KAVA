@@ -65,7 +65,9 @@ class Client(db.Model):
     id_client = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     numero_de_telephone = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=True)
     quartier_de_residence = db.Column(db.String(50), nullable=False)
+ 
 
 
 

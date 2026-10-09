@@ -14,45 +14,51 @@
 
 {% block content %}
 <form method="POST" action="{{ url_for('edit_user', id=user.id) }}">
-    <div class="mb-3">
-        <label for="name" class="form-label">Nom<span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="name" class="form-label">Nom<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+        </div>
+        <div class="col-md-6">
+            <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+        </div>
+        <div class="col-md-6">
+            <label for="telephone" class="form-label">Téléphone</label>
+            <input type="text" class="form-control" id="telephone" name="telephone" value="{{ user.telephone }}"
+                required>
+        </div>
+        <div class="col-md-6">
+            <label for="ville" class="form-label">Ville</label>
+            <input type="text" class="form-control" id="ville" name="ville" value="{{ user.ville }}" required>
+        </div>
+        <div class="col-md-6">
+            <label for="quartier" class="form-label">Quartier</label>
+            <input type="text" class="form-control" id="quartier" name="quartier" value="{{ user.quartier }}"
+                required>
+        </div>
+        <div class="col-md-6">
+            <label for="role" class="form-label">Rôle<span class="text-danger">*</span></label>
+            <select class="form-select" id="role" name="role" required>
+                <option value="Gérant" {% if user.role.value=='Gérant' %}selected{% endif %}>Gérant</option>
+                <option value="Caissier" {% if user.role.value=='Caissier' %}selected{% endif %}>Caissier</option>
+                <option value="Serveur" {% if user.role.value=='Serveur' %}selected{% endif %}>Serveur</option>
+                <option value="Livreur" {% if user.role.value=='Livreur' %}selected{% endif %}>Livreur</option>
+                <option value="DAF" {% if user.role.value=='DAF' %}selected{% endif %}>DAF</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="status" class="form-label">Statut</label>
+            <select class="form-select" id="status" name="status" required>
+                <option value="Actif" {% if user.status=='Actif' %}selected{% endif %}>Actif</option>
+                <option value="Inactif" {% if user.status=='Inactif' %}selected{% endif %}>Inactif</option>
+                <option value="Bloqué" {% if user.status=='Bloqué' %}selected{% endif %}>Bloqué</option>
+            </select>
+        </div>
+        <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-gold">Mettre à jour</button>
+            <a href="{{ url_for('users') }}" class="btn btn-secondary">Annuler</a>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
-        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="telephone" class="form-label">Téléphone</label>
-        <input type="text" class="form-control" id="telephone" name="telephone" value="{{ user.telephone }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="ville" class="form-label">Ville</label>
-        <input type="text" class="form-control" id="ville" name="ville" value="{{ user.ville }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="quartier" class="form-label">Quartier</label>
-        <input type="text" class="form-control" id="quartier" name="quartier" value="{{ user.quartier }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="role" class="form-label">Rôle<span class="text-danger">*</span></label>
-        <select class="form-select" id="role" name="role" required>
-            <option value="Gérant" {% if user.role.value=='Gérant' %}selected{% endif %}>Gérant</option>
-            <option value="Caissier" {% if user.role.value=='Caissier' %}selected{% endif %}>Caissier</option>
-            <option value="Serveur" {% if user.role.value=='Serveur' %}selected{% endif %}>Serveur</option>
-            <option value="Livreur" {% if user.role.value=='Livreur' %}selected{% endif %}>Livreur</option>
-            <option value="DAF" {% if user.role.value=='DAF' %}selected{% endif %}>DAF</option>
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="status" class="form-label">Statut</label>
-        <select class="form-select" id="status" name="status" required>
-            <option value="Actif" {% if user.status=='Actif' %}selected{% endif %}>Actif</option>
-            <option value="Inactif" {% if user.status=='Inactif' %}selected{% endif %}>Inactif</option>
-            <option value="Bloqué" {% if user.status=='Bloqué' %}selected{% endif %}>Bloqué</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-gold">Mettre à jour</button>
-    <a href="{{ url_for('users') }}" class="btn btn-secondary">Annuler</a>
 </form>
 {% endblock %}

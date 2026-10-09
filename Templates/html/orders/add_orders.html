@@ -127,11 +127,6 @@
         document.getElementById("calc-percue").textContent = fmt(percue);
         document.getElementById("calc-reste").textContent = fmt(reste);
         document.getElementById("calc-rembours").textContent = fmt(rembours);
-
-        let statut = "Crédit";
-        if (total > 0 && percue >= total) statut = "Comptant";
-        else if (percue > 0) statut = "Partielle";
-        document.getElementById("calc-statut").textContent = statut;
     }
 
     document.getElementById("ajouter-ligne").addEventListener("click", function () {

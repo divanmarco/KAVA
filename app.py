@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+import email
 from commande import creer_commande, StockInsuffisant
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
@@ -36,8 +37,7 @@ with app.app_context():
     db.create_all()
 from sqlalchemy import desc
 
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 @login_required
 def index():
     ca_total = db.session.query(
@@ -52,28 +52,51 @@ def index():
         func.coalesce(func.count(Client.id_client), 0)
     ).scalar()
 
-
     commandes_recentes = (
-            db.session.query(
-                Commande.id_commande,
-                Client.name.label('client_name'),
-                Vente.montant_attendu,
-                Vente.montant_percue,
-                Vente.statut,
-            )
-            .join(Client, Commande.id_client == Client.id_client)
-            .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
-            .order_by(desc(Commande.id_commande))
-            .limit(5)
-            .all()
+        db.session.query(
+            Commande.id_commande,
+            Client.name.label('client_name'),
+            Vente.montant_attendu,
+            Vente.montant_percue,
+            Vente.statut,
         )
-    print(commandes_recentes[0]._fields)
-    return render_template('html/index.html',
-            ca_total=float(ca_total),
-            total_articles=int(total_articles),
-            total_clients=int(total_clients),
-            commandes_recentes=commandes_recentes,
-            produits_alerte = get_produits_sous_seuil())
+        .join(Client, Commande.id_client == Client.id_client)
+        .outerjoin(Vente, Vente.id_commande == Commande.id_commande)
+        .order_by(desc(Commande.id_commande))
+        .limit(5)
+        .all()
+    )
+
+    top_produits = (
+        db.session.query(
+            Produits.name,
+            func.sum(Ligne_Commande.quantite).label("qte_vendue"),
+        )
+        .join(Ligne_Commande, Ligne_Commande.id_produit == Produits.id_produit)
+        .group_by(Produits.id_produit, Produits.name)
+        .order_by(func.sum(Ligne_Commande.quantite).desc())
+        .limit(6)
+        .all()
+    )
+
+    ratios_produits = [
+        {
+            "nom": nom,
+            "quantite": int(qte),
+            "ratio": round(int(qte) / int(total_articles) * 100, 1) if total_articles else 0,
+        }
+        for nom, qte in top_produits
+    ]
+
+    return render_template(
+        'html/index.html',
+        ca_total=float(ca_total),
+        total_articles=int(total_articles),
+        total_clients=int(total_clients),
+        commandes_recentes=commandes_recentes,
+        produits_alerte=get_produits_sous_seuil(),
+        ratios_produits=ratios_produits,
+    )
 
 def get_stock_stats():
     stock_rows = (
@@ -85,16 +108,18 @@ def get_stock_stats():
         .all()
     )
 
-
     quantite_rows = (
-        db.session.query(Produits.categorie, func.coalesce(func.sum(Ligne_Commande.quantite), 0))
+        db.session.query(
+            Produits.categorie,
+            func.coalesce(func.sum(Ligne_Commande.quantite), 0),
+        )
         .join(Ligne_Commande, Ligne_Commande.id_produit == Produits.id_produit)
         .group_by(Produits.categorie)
         .all()
     )
     vendu_par_cat = {cat: int(qte) for cat, qte in quantite_rows}
 
-    max_stock = max((int(s) for _, s in stock_rows), default=0) or 1  # évite la division par 0
+    max_stock = max((int(s) for _, s in stock_rows), default=0) or 1
 
     stats = []
     for cat, stock in stock_rows:
@@ -105,10 +130,11 @@ def get_stock_stats():
             "label": cat,
             "stock": stock,
             "vendu": vendu,
-            "stock_pct": round(stock / max_stock * 100),       
-            "ratio": round(vendu / total * 100) if total else 0,  
+            "stock_pct": round(stock / max_stock * 100),
+            "ratio": round(vendu / total * 100) if total else 0,
         })
     return stats
+
 
 def get_produits_sous_seuil():
     return (
@@ -300,13 +326,7 @@ def add_product():
             flash("La quantité en stock est obligatoire.", "danger")
             return render_template("html/product/add_product.html")
 
-        if not categorie:
-            flash("La catégorie est obligatoire.", "danger")
-            return render_template("html/product/add_product.html")
-
-        if not status:  
-            flash("Le statut est obligatoire.", "danger")
-            return render_template("html/product/add_product.html")
+   
 
         if int(quantite_en_stock) <= 0 :
             product.status = "Épuisé"
@@ -504,18 +524,19 @@ def add_customer():
     if request.method == "POST":
         name = request.form.get("name")
         telephone = request.form.get("telephone")
+        email = request.form.get("email")
         quartier = request.form.get("quartier")
 
         if not name:
             flash("Le nom est obligatoire.", "danger")
-            return render_template("html/customers/add_customer.html")
-
-        if not telephone:
-            flash("Le numéro de téléphone est obligatoire.", "danger")
-            return render_template("html/customers/add_customer.html")        
+            return render_template("html/customers/add_customer.html")      
 
         if not telephone.isdigit() or len(telephone) != 9:
             return redirect(url_for("customer"))
+
+        if not email:
+            flash("l'adresse email est obligatoire")
+            return render_template("html/customers/add_customer.html")
 
         if not quartier:
             flash("Le quartier de résidence est obligatoire.", "danger")
@@ -524,6 +545,7 @@ def add_customer():
         nouveau_client = Client(
             name=name,
             numero_de_telephone=telephone,
+            email=email,
             quartier_de_residence=quartier
         )
 
@@ -546,6 +568,7 @@ def edit_customer(id_client):
     if request.method == "POST":
         client.name = request.form.get("name")
         client.numero_de_telephone = request.form.get("telephone")
+        client.email = request.form.get("email")
         client.quartier_de_residence = request.form.get("quartier")
 
         db.session.commit()
@@ -580,6 +603,7 @@ def customers():
         customers_query = customers_query.filter(
             Client.name.ilike(f'%{query}%') |
             Client.numero_de_telephone.ilike(f'%{query}%') |
+            Client.email.ilike(f'%{query}%')|
             Client.quartier_de_residence.ilike(f'%{query}%')
         )
 
@@ -712,10 +736,16 @@ def add_orders():
 @login_required
 def orders_details(id_commande):
     commande = Commande.query.get_or_404(id_commande)
-    client = Client.query.get(commande.id_client)  
-    vente = Vente.query.filter_by(id_commande=id_commande).first()  
+    client = Client.query.get(commande.id_client)
+    vente = Vente.query.filter_by(id_commande=id_commande).first()
     lignes, total = _lignes_commande(id_commande)
- 
+
+    remboursement = 0
+    reste_a_payer = 0
+    if vente:
+        remboursement = max(vente.montant_percue - vente.montant_attendu, 0)
+        reste_a_payer = max(vente.montant_attendu - vente.montant_percue, 0)
+
     return render_template(
         "html/orders/orders_details.html",
         commande=commande,
@@ -723,6 +753,8 @@ def orders_details(id_commande):
         vente=vente,
         lignes=lignes,
         total=total,
+        remboursement=remboursement,
+        reste_a_payer=reste_a_payer,
     )
 
 @app.route("/orders/edit/<int:id_commande>", methods=["GET", "POST"])
@@ -860,6 +892,11 @@ def delivery():
     )
     return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
 
+@app.route('/delivery/<int:id>')
+def hello():
+    return render_template('html/delivery/add_delivery.html', command = "IDRIS")
+    
+
 @app.route('/delivery/<int:id_livraison>/delete', methods=['POST'])
 @login_required
 def delete_delivery(id_livraison):
@@ -878,30 +915,61 @@ def _parse_dt(value):
     """'2026-10-01T14:30' (datetime-local) -> datetime, ou None si vide."""
     return datetime.strptime(value, "%Y-%m-%dT%H:%M") if value else None
 
-
 @app.route('/add_delivery', methods=['GET', 'POST'])
 @login_required
 def add_delivery():
-    commandes = Commande.query.order_by(Commande.id_commande.desc()).all()
-    livreurs = User.query.filter_by(role=RoleEnum.LIVREUR).order_by(User.name).all()  # gardez le nom d'enum que vous avez corrigé
+    id_commande = request.args.get('id_commande', type=int)
+    if not id_commande:
+        flash("Choisissez d'abord une commande à planifier.", "warning")
+        return redirect(url_for('delivery'))
+
+    cmd = Commande.query.get_or_404(id_commande)
+
+    if Livraison.query.filter_by(id_commande=cmd.id_commande).first():
+        flash("Cette commande a déjà une livraison.", "warning")
+        return redirect(url_for('delivery'))
+
+    livreurs = (
+        User.query
+        .filter_by(role=RoleEnum.LIVREUR)
+        .order_by(User.name)
+        .all()
+    )
 
     if request.method == 'POST':
-        commande = Commande.query.get_or_404(request.form['id_commande'])
+        id_utilisateur = request.form.get('id_utilisateur', type=int)
+        adresse = request.form.get('adresse_livraison', '').strip()
+        try:
+            date_prevue = _parse_dt(request.form.get('date_livraison_prevue'))
+        except ValueError:
+            date_prevue = None
+
+        if (not id_utilisateur or not User.query.get(id_utilisateur)
+                or not adresse or not date_prevue):
+            flash("Veuillez remplir tous les champs correctement.", "danger")
+            return render_template(
+                'html/delivery/add_delivery.html',
+                cmd=cmd, livreurs=livreurs, form=request.form
+            )
+
         livraison = Livraison(
-            id_commande=commande.id_commande,
-            id_client=commande.id_client,
-            id_utilisateur=request.form['id_utilisateur'],
-            adresse_livraison=request.form['adresse_livraison'].strip(),
-            date_livraison_prevue=_parse_dt(request.form['date_livraison_prevue']),
-            statut=request.form['statut'],
+            id_commande=cmd.id_commande,
+            id_client=cmd.id_client,
+            id_utilisateur=id_utilisateur,
+            adresse_livraison=adresse,
+            date_livraison_prevue=date_prevue,
+            statut='en_cours',
         )
         db.session.add(livraison)
         db.session.commit()
+
         flash("Livraison ajoutée avec succès.", "success")
         return redirect(url_for('delivery'))
 
-    return render_template('html/delivery/add_delivery.html',commandes=commandes, livreurs=livreurs, form={})
-
+    return render_template(
+        'html/delivery/add_delivery.html',
+        cmd=cmd, livreurs=livreurs, form={}
+    )
 
 @app.route('/delivery/<int:id_livraison>/edit', methods=['GET', 'POST'])
 @login_required

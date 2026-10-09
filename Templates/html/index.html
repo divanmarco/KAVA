@@ -88,64 +88,87 @@
     </article>
   </div>
 </section>
+<section class="row g-3 mt-1" aria-label="Produits et commandes">
 
-<div class="col-12 col-xl-4">
-  <div class="panel h-100">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-      <h6 class="m-0 font-weight-bold text-gold">Commandes Récentes</h6>
-      <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout.</a>
-    </div>
-    <div class="panel-body">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Client</th>
-              <th scope="col">Statut</th>
-              <th scope="col">Montant</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in commandes_recentes %}
-            <tr class="position-relative">
-              <td>
-                <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}" 
-                class="stretched-link text-decoration-none text-dark">
-                  {{ row.client_name }}<br>
-                  <span class="text-muted small">cmd-{{ row.id_commande }}</span>
-                </a>
-              </td>
-              <td>
-                {% if row.statut == 'payee' %}
-                <span class="badge bg-success">Payée</span>
-                {% elif row.statut == 'partielle' %}
-                <span class="badge bg-warning text-dark">Partielle</span>
-                {% elif row.statut == 'impayee' %}
-                <span class="badge bg-danger">Impayée</span>
-                {% elif row.statut == 'à_livrer' %}
-                <span class="badge bg-secondary">À livrer</span>
-                {% else %}
-                <span class="badge bg-light text-dark">{{ row.statut or 'Inconnu' }}</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if row.montant_attendu is not none %}
-                {{ "%.2f"|format(row.montant_attendu) }} <span class="devise">FCFA</span>
-                {% else %}
-                —
-                {% endif %}
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="3" class="text-center text-muted">Aucune commande récente</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <div class="col-12 col-xl-6">
+    <div class="panel h-100">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-gold">Produits les plus vendus</h6>
+      </div>
+      <div class="panel-body">
+        {% for p in ratios_produits %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>{{ p.nom }} <small class="text-muted">({{ p.quantite }} vendus)</small></span>
+            <strong>{{ p.ratio }}%</strong>
+          </div>
+          <div class="progress" style="height: 40px;">
+            <div class="progress-bar bg-success"style="width: {{ p['ratio'] }}%;"></div>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">Aucune vente enregistrée pour le moment.</p>
+        {% endfor %}
       </div>
     </div>
   </div>
-</div>
+
+  <div class="col-12 col-xl-6">
+    <div class="panel h-100">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-gold">Commandes Récentes</h6>
+        <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout.</a>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Client</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in commandes_recentes %}
+              <tr class="position-relative">
+                <td>
+                  <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}"
+                    class="stretched-link text-decoration-none text-dark">
+                    {{ row.client_name }}<br>
+                    <span class="text-muted small">cmd-{{ row.id_commande }}</span>
+                  </a>
+                </td>
+                <td>
+                  {% if row.statut == 'payee' %}
+                  <span class="badge bg-success">Comptant</span>
+                  {% elif row.statut == 'partielle' %}
+                  <span class="badge bg-warning text-dark">Partielle</span>
+                  {% elif row.statut == 'impayee' %}
+                  <span class="badge bg-danger">Crédit</span>
+                  {% else %}
+                  <span class="badge bg-light text-dark">Sans vente</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if row.montant_attendu is not none %}
+                  {{ "%.2f"|format(row.montant_attendu) }} <span class="devise">FCFA</span>
+                  {% else %}
+                  —
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="3" class="text-center text-muted">Aucune commande récente</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </section>
 {% endblock %}

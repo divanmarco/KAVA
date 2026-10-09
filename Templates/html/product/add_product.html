@@ -14,48 +14,52 @@
 
 {% block content %}
 <form method="POST" action="{{ url_for('add_product') }}">
-    <div class="mb-3">
-        <label for="name" class="form-label">Nom</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-    </div>
-    <div class="mb-3">
-        <label>Prix d'achat</label>
-        <input class="form-control" type="number" name="prix_achat" step="0.01" required>
-    </div>
-    <div class="mb-3">
-        <label>Prix de vente</label>
-        <input class="form-control" type="number" name="prix_de_vente" step="0.01" required>
-    </div>
-    <div class="mb-3">
-        <label>Quantité en stock</label>
-        <input class="form-control" type="number" name="quantite_en_stock" required>
-    </div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="name" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="col-md-6">
+            <label>Prix d'achat</label>
+            <input class="form-control" type="number" name="prix_achat" step="0.01" required>
+        </div>
+        <div class="col-md-6">
+            <label>Prix de vente</label>
+            <input class="form-control" type="number" name="prix_de_vente" step="0.01" required>
+        </div>
+        <div class="col-md-6">
+            <label>Quantité en stock</label>
+            <input class="form-control" type="number" name="quantite_en_stock" required>
+        </div>
 
-    <div class="mb-3">
-        <label for="role" class="form-label">Catégorie</label>
-        <select class="form-select" id="role" name="role" required>
-            <option value="Vin rouge">Vin rouge</option>
-            <option value="Vin blanc">Vin blanc</option>
-            <option value="Champagne">Champagne</option>
-            <option value="Spiritueux">Spiritueux</option>
-            <option value="Bières">Bières</option>
-            <option value="Boissons non alcoolisées">Boissons non alcoolisées</option>
-            <option value="Vodka">Vodka</option>
-            <option value="Whisky">Whisky</option>
-            <option value="Cognac">Cognac</option>
-            <option value="Soft">Soft</option>
-            <option value="Rhum">Rhum</option>
-            <option value="Autres">Autres</option>
-        </select>
+        <div class="col-md-6">
+            <label for="role" class="form-label">Catégorie</label>
+            <select class="form-select" id="role" name="role" required>
+                <option value="">Choisir une Catégorie</option>
+                <option value="Vin rouge">Vin rouge</option>
+                <option value="Vin blanc">Vin blanc</option>
+                <option value="Champagne">Champagne</option>
+                <option value="Spiritueux">Spiritueux</option>
+                <option value="Bières">Bières</option>
+                <option value="Boissons non alcoolisées">Boissons non alcoolisées</option>
+                <option value="Vodka">Vodka</option>
+                <option value="Whisky">Whisky</option>
+                <option value="Cognac">Cognac</option>
+                <option value="Soft">Soft</option>
+                <option value="Rhum">Rhum</option>
+                <option value="Autres">Autres</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="status" class="form-label">Statut</label>
+            <select class="form-select" id="status" name="status" required>
+                <option value="">Choisir un statut</option>
+                <option value="En stock">En stock</option>
+                <option value="Épuisé">Épuisé</option>
+            </select>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="status" class="form-label">Statut</label>
-        <select class="form-select" id="status" name="status" required>
-            <option value="">Choisir un statut</option>
-            <option value="En stock">En stock</option>
-            <option value="Épuisé">Épuisé</option>
-        </select>
-    </div>
+    <div class="col-12 mt-4"></div>
     <button type="submit" class="btn btn-gold">Ajouter le produit</button>
     <a href="{{ url_for('product') }}" class="btn btn-secondary">Annuler</a>
 </form>

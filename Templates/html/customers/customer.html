@@ -15,7 +15,7 @@
 
 {% block heading_actions %}
 <a class="btn btn-gold btn-sm" href="{{ url_for('add_customer') }}">
-  <i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Nouveau Client
+    <i class="bi bi-file-earmark-plus" aria-hidden="true"></i> Nouveau Client
 </a>
 {% endblock %}
 
@@ -35,6 +35,7 @@
                 <th>Nom</th>
                 <th>Téléphone</th>
                 <th>Quartier de résidence</th>
+                <th>email</th>
                 <th class="text-end">Action</th>
             </tr>
         </thead>
@@ -49,6 +50,7 @@
                 </td>
                 <td>{{ client.numero_de_telephone }}</td>
                 <td>{{ client.quartier_de_residence }}</td>
+                <td>{{client.email}}</td>
                 <td class="text-end position-relative" style="z-index: 2;">
                     <a href="{{ url_for('customer_details', id_client=client.id_client) }}" class="btn btn-gold"><i
                             class="bi bi-eye"></i></a>

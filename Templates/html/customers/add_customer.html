@@ -8,26 +8,32 @@
 
 {% block heading_actions %}
 <a class="btn btn-secondary btn-sm" href="{{ url_for('customers') }}">
-    <i class="bi bi-arrow-left"></i> Retour à la liste
+    <i class="bi bi-arrow-left"></i> Retour
 </a>
 {% endblock %}
 
 {% block content %}
 <form method="POST" action="{{ url_for('add_customer') }}">
-    <div class="mb-3">
-        <label for="name" class="form-label">Nom</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="name" class="form-label">Nom<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="col-md-6">
+            <label for="telephone" class="form-label">Numéro de téléphone<span class="text-danger">*</span></label>
+            <input type="tel" name="telephone" class="form-control" pattern="[0-9]{9}" maxlength="9" required>
+        </div>
+        <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="col-md-6">
+            <label for="quartier" class="form-label">Quartier de résidence</label>
+            <input type="text" class="form-control" id="quartier" name="quartier" required>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="telephone" class="form-label">Numéro de téléphone</label>
-        <input type="tel" name="telephone" class="form-control" pattern="[0-9]{9}" maxlength="9" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="quartier" class="form-label">Quartier de résidence</label>
-        <input type="text" class="form-control" id="quartier" name="quartier" required>
-    </div>
-        <button type="submit" class="btn btn-gold">Enregistrer</button>
-        <a href="{{ url_for('customers') }}" class="btn btn-secondary">Annuler</a>
+    <div class="col-12 mt-4"></div>
+    <button type="submit" class="btn btn-gold">Enregistrer</button>
+    <a href="{{ url_for('customers') }}" class="btn btn-secondary">Annuler</a>
 </form>
 {% endblock %}

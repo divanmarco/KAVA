@@ -7,37 +7,47 @@
 {% block page_subtitle %}{{ nouveau_rapport.name }}{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary btn-sm" href="{{ url_for('edit_charts', id=nouveau_rapport.id_rapport) }}">
+<a class="btn btn-gold" href="{{ url_for('edit_charts', id=nouveau_rapport.id_rapport) }}">
   Modifier
-  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('charts') }}">
-    <i class="bi bi-arrow-left"></i> Retour à la liste
+  <a class="btn btn-outline-secondary" href="{{ url_for('charts') }}">
+    <i class="bi bi-arrow-left"></i> Retour
   </a>
   {% endblock %}
 
   {% block content %}
-  <dl class="row">
-    <dt class="col-sm-3">Nom</dt>
-    <dd class="col-sm-9">{{ nouveau_rapport.name }}</dd>
+  <dl class="row g-3">
+    <div class="col-md-6">
+      <dt>Nom</dt>
+      <dd>{{ nouveau_rapport.name }}</dd>
+    </div>
 
-    <dt class="col-sm-3">Contenu</dt>
-    <dd class="col-sm-9">{{ nouveau_rapport.contenu }}</dd>
+    <div class="col-md-6">
+      <dt>Contenu</dt>
+      <dd>{{ nouveau_rapport.contenu }}</dd>
+    </div>
 
-    <dt class="col-sm-3">Date Début</dt>
-    <dd class="col-sm-9">{{ nouveau_rapport.date_debut }}</dd>
+    <div class="col-md-6">
+      <dt>Date Début</dt>
+      <dd>{{ nouveau_rapport.date_debut }}</dd>
+    </div>
 
-    <dt class="col-sm-3">Date Fin</dt>
-    <dd class="col-sm-9">{{ nouveau_rapport.date_fin }}</dd>
+    <div class="col-md-6">
+      <dt>Date Fin</dt>
+      <dd>{{ nouveau_rapport.date_fin }}</dd>
+    </div>
 
-    <dt class="col-sm-3">Type</dt>
-    <dd class="col-sm-9">{{ nouveau_rapport.type }}</dd>
+    <div class="col-md-6">
+      <dt>Type</dt>
+      <dd>{{ nouveau_rapport.type }}</dd>
+    </div>
 
-
-    <dt class="col-sm-3">Statut</dt>
-    <dd class="col-sm-9">
-      <span
-        class="{{ 'text-success' if nouveau_rapport.statut == 'Publié' else 'text-seconfary' if nouveau_rapport.statut == 'En cours' }}">
-        {{ nouveau_rapport.status }}
-      </span>
-    </dd>
+    <div class="col-md-6">
+      <dt>Statut</dt>
+      <dd> <span
+          class="{{ 'text-success' if nouveau_rapport.statut == 'Publié' else 'text-seconfary' if nouveau_rapport.statut == 'En cours' }}">
+          {{ nouveau_rapport.status }}
+        </span>
+      </dd>
+    </div>
   </dl>
   {% endblock %}

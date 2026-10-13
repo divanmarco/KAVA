@@ -50,10 +50,11 @@
     </div>
 
     <div class="d-flex justify-content-end gap-2 mt-4">
-        <a class="btn btn-secondary btn-sm" href="{{ url_for('delivery') }}">Annuler</a>
         <button type="submit" class="btn btn-gold">
             <i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer
         </button>
+        <a class="btn btn-secondary" href="{{ url_for('delivery') }}">Annuler</a>
+        
     </div>
 </form>
 {% endblock %}

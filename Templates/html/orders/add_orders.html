@@ -28,15 +28,22 @@
         <label class="form-label">Produits</label>
         <div id="lignes">
             <div class="row g-2 mb-2 ligne-produit">
-                <div class="col-md-7">
+                <div class="col-md-5">
                     <select class="form-select" name="id_produit" required>
                         <option value="">Choisir un produit</option>
                         {% for product in products %}
                         <option value="{{ product.id_produit }}" data-prix="{{ product.prix_de_vente }}"
+                            data-prix-bloc="{{ product.prix_bloc }}" data-unite-bloc="{{ product.unite_par_bloc }}"
                             data-nom="{{ product.name }}">
                             {{ product.name }} - {{ product.prix_de_vente }} ({{ product.quantite_en_stock }} en stock)
                         </option>
                         {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="type_vente">
+                        <option value="unite">Unité</option>
+                        <option value="bloc">Carton</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -87,6 +94,7 @@
     const lignes = document.getElementById("lignes");
     const percueInput = document.getElementById("montant_percue");
 
+
     function fmt(n) {
         return n.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
     }
@@ -104,11 +112,30 @@
         let total = 0;
 
         lignes.querySelectorAll(".ligne-produit").forEach(function (ligne) {
-            const select = ligne.querySelector("select");
-            const option = select.options[select.selectedIndex];
-            const prix = parseFloat(option.dataset.prix);
+
+            const produitSelect = ligne.querySelector('select[name="id_produit"]');
+            const option = produitSelect.options[produitSelect.selectedIndex];
+
+            const typeVente =
+                ligne.querySelector('select[name="type_vente"]').value;
+
+            let prix;
+
+            if (typeVente === "bloc") {
+                prix = parseFloat(option.dataset.prixBloc);
+            } else {
+                prix = parseFloat(option.dataset.prix);
+            }
             const qte = parseInt(ligne.querySelector("input").value, 10);
-            if (isNaN(prix) || isNaN(qte) || qte < 1) return;
+            if (isNaN(qte) || qte < 1) return;
+            if (isNaN(prix)) {
+                const tr = document.createElement("tr");
+                tr.appendChild(cellule(option.dataset.nom || "—", false));
+                tr.appendChild(cellule("Prix " + (typeVente === "bloc" ? "carton" : "unité") + " non défini", true));
+                tr.appendChild(cellule("", true));
+                corps.appendChild(tr);
+                return;
+            }
 
             const sous = prix * qte;
             total += sous;
@@ -132,6 +159,7 @@
     document.getElementById("ajouter-ligne").addEventListener("click", function () {
         const copie = lignes.querySelector(".ligne-produit").cloneNode(true);
         copie.querySelector("select").selectedIndex = 0;
+        copie.querySelector('select[name="type_vente"]').selectedIndex = 0;
         copie.querySelector("input").value = 1;
         lignes.appendChild(copie);
         recalculer();
@@ -150,5 +178,8 @@
     percueInput.addEventListener("input", recalculer);
 
     recalculer();
+    console.log("Prix unité :", option.dataset.prix);
+    console.log("Prix carton :", option.dataset.prixBloc);
+    console.log("Type vente :", typeVente);
 </script>
 {% endblock %}

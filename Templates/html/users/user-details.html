@@ -7,10 +7,10 @@
 {% block page_subtitle %}{{ user.name }}{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary btn-sm" href="{{ url_for('edit_user', id=user.id) }}">
+<a class="btn btn-secondary" href="{{ url_for('edit_user', id=user.id) }}">
   <i class="bi bi-pencil"></i> Modifier
 </a>
-<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('users') }}">
+<a class="btn btn-outline-secondary" href="{{ url_for('users') }}">
   <i class="bi bi-arrow-left"></i> Retour à la liste
 </a>
 {% endblock %}

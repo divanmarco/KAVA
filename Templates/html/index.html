@@ -28,7 +28,7 @@
           </svg>
         </span>
       </div>
-      <div class="devise metric-value">{{ ca_total }}<span class="devise1">FCFA</span></div>
+      <div class="devise metric-value">{{ ca_total | milliers }}<span class="devise1">FCFA</span></div>
       <div class="metric-meta">
       </div>
     </article>
@@ -37,7 +37,7 @@
   <div class="col-12 col-sm-6 col-xl-3">
     <article class="metric-card metric-success">
       <div class="metric-top">
-        <span class="metric-label">VENTES RÉALISÉES</span>
+        <span class="metric-label">NOMBRE DE PRODUITS VENDUS</span>
         <span class="metric-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart"
             viewBox="0 0 16 16">
@@ -54,7 +54,7 @@
   <div class="col-12 col-xl-3">
     <article class="metric-card metric-danger">
       <div class="metric-top">
-        <span class="metric-label text-danger">ALERTES STOCK</span>
+        <span class="metric-label text-danger">NOMBRE DE PRODUITS SOUS LE SEUIL</span>
         <span class="metric-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-exclamation-triangle" viewBox="0 0 16 16">

@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 from flask.config import T
 from flask_wtf import FlaskForm
+from sqlalchemy import true
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_login import UserMixin
@@ -25,7 +26,7 @@ class User(db.Model, UserMixin):
     __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     matricule = db.Column(db.String(50), unique=True, nullable=False)
     telephone = db.Column(db.String(20), nullable=False)
@@ -63,8 +64,8 @@ class Client(db.Model):
     __tablename__ = "client"
 
     id_client = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    numero_de_telephone = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    numero_de_telephone = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), nullable=True)
     quartier_de_residence = db.Column(db.String(50), nullable=False)
  
@@ -75,10 +76,12 @@ class Produits(db.Model):
     __tablename__ = "produits"
 
     id_produit = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     prix_achat = db.Column(db.Numeric(10, 2), nullable=False)
     prix_de_vente = db.Column(db.Numeric(10, 2), nullable=False)
+    prix_bloc = db.Column(db.Numeric(10,2)) 
     quantite_en_stock = db.Column(db.Integer, nullable=False)
+    unite_par_bloc = db.Column(db.Integer, default=1)
     categorie = db.Column(db.String(50), nullable=True)
     status = db.Column(
         db.Enum("En stock", "Épuisé", name="status_produit_enum"),

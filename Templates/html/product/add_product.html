@@ -31,10 +31,19 @@
             <label>Quantité en stock</label>
             <input class="form-control" type="number" name="quantite_en_stock" required>
         </div>
+        <div class="col-md-6">
+            <label>Unités par bloc</label>
+            <input class="form-control" type="number" name="unite_par_bloc" value="6" min="1" required>
+        </div>
+
+        <div class="col-md-6">
+            <label>Prix du bloc</label>
+            <input class="form-control" type="number" name="prix_bloc" step="0.01">
+        </div>
 
         <div class="col-md-6">
             <label for="role" class="form-label">Catégorie</label>
-            <select class="form-select" id="role" name="role" required>
+            <select class="form-select" name="categorie" required>
                 <option value="">Choisir une Catégorie</option>
                 <option value="Vin rouge">Vin rouge</option>
                 <option value="Vin blanc">Vin blanc</option>
@@ -48,14 +57,6 @@
                 <option value="Soft">Soft</option>
                 <option value="Rhum">Rhum</option>
                 <option value="Autres">Autres</option>
-            </select>
-        </div>
-        <div class="col-md-6">
-            <label for="status" class="form-label">Statut</label>
-            <select class="form-select" id="status" name="status" required>
-                <option value="">Choisir un statut</option>
-                <option value="En stock">En stock</option>
-                <option value="Épuisé">Épuisé</option>
             </select>
         </div>
     </div>

@@ -7,12 +7,13 @@
 {% block page_subtitle %}Détails de la livraison.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-outline-gold btn-sm" href="{{ url_for('delivery') }}">
-    <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
-</a>
-<a class="btn btn-outline-gold btn-sm" href="{{ url_for('edit_delivery', id_livraison=delivery.id) }}">
+<a class="btn btn-outline-gold" href="{{ url_for('edit_delivery', id_livraison=delivery.id) }}">
     <i class="bi bi-pencil" aria-hidden="true"></i> Modifier
 </a>
+<a class="btn btn-outline-secondary" href="{{ url_for('delivery') }}">
+    <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
+</a>
+
 {% endblock %}
 
 {% block content %}

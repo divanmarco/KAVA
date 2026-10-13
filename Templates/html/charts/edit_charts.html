@@ -16,7 +16,7 @@
 {% block page_subtitle %}Mettez à jour les informations du rapport « {{ rapport.name }} ».{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary btn-sm" href="{{ url_for('charts') }}">
+<a class="btn btn-secondary" href="{{ url_for('charts') }}">
   <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
 </a>
 {% endblock %}
@@ -68,10 +68,11 @@
       </div>
 
       <div class="d-flex justify-content-end gap-2">
-        <a href="{{ url_for('charts') }}" class="btn btn-secondary">Annuler</a>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-gold">
           <i class="bi bi-check2"></i> Enregistrer
         </button>
+        <a href="{{ url_for('charts') }}" class="btn btn-secondary">Annuler</a>
+
       </div>
 
     </form>

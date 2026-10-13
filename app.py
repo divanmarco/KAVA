@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 import email
+from http import client
 from commande import creer_commande, StockInsuffisant
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
@@ -36,6 +37,11 @@ migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
 from sqlalchemy import desc
+
+
+@app.template_filter('milliers')
+def milliers(valeur):
+    return "{:,}".format(valeur).replace(",", " ")
 
 @app.route('/')
 @login_required
@@ -200,7 +206,7 @@ def add_user():
         ville = request.form.get("ville")
         quartier = request.form.get("quartier")
         role = request.form.get("role")
-        status = request.form.get("status")
+       
 
         if not name:
             flash("Le nom est obligatoire.", "danger")
@@ -221,6 +227,14 @@ def add_user():
         mot_de_passe_clair = User.generer_mot_de_passe()
         mot_de_passe_hash = generate_password_hash(mot_de_passe_clair)
 
+
+        utilisateur_existant = User.query.filter(
+        User.name.ilike(name)).first()
+        
+        if  utilisateur_existant:
+            flash ("Cet Utilisateur existe déjà!", "danger")
+            return redirect(url_for('add-user'))
+
         nouvel_utilisateur = User(
             name=name,
             email=email,
@@ -230,7 +244,7 @@ def add_user():
             quartier=quartier,
             mot_de_passe=mot_de_passe_hash,
             role=RoleEnum(role),
-            status=status
+           
         )
 
         try:
@@ -277,7 +291,7 @@ def delete_user(id):
     return redirect(url_for("users"))
 
 @app.route('/users')
-def users():
+def users():    
     query = request.args.get('q', '', type=str)
     page = request.args.get('page', 1, type=int)
 
@@ -291,8 +305,11 @@ def users():
             User.status.ilike(f'%{query}%') |
             User.email.ilike(f'%{query}%')
         )
-
-    users_page = users_query.paginate(page=page, per_page=5, error_out=False)
+    users_page = users_query.order_by(User.id.desc()).paginate(
+    page=page,
+    per_page=5,
+    error_out=False
+    )
 
     return render_template('html/users/users.html', users=users_page, q=query)
 
@@ -307,6 +324,8 @@ def add_product():
         prix_achat = request.form.get("prix_achat")
         prix_de_vente = request.form.get("prix_de_vente")
         quantite_en_stock = request.form.get("quantite_en_stock")
+        unite_par_bloc = request.form.get("unite_par_bloc", 1)
+        prix_bloc = request.form.get("prix_bloc")
         categorie = request.form.get("categorie")
         status = request.form.get("status")
 
@@ -325,15 +344,21 @@ def add_product():
         if not quantite_en_stock:
             flash("La quantité en stock est obligatoire.", "danger")
             return render_template("html/product/add_product.html")
+          
+        produit_existant = Produits.query.filter(
+            Produits.name.ilike(name)).first()
 
-   
+        if produit_existant:
+            flash("Ce Produit existe déjà!", "danger")
+            return redirect(url_for('add_product'))
+        
+        if int(quantite_en_stock) <= 0:
+            status = "Épuisé"
+        else:
+            status = "En stock"
+  
 
-        if int(quantite_en_stock) <= 0 :
-            product.status = "Épuisé"
-        else :
-            product.status = "En stock"
-            
-
+        
         nouveau_produit = Produits(
             name=name,
             prix_achat=prix_achat,
@@ -406,7 +431,7 @@ def product():
             Produits.prix_de_vente.ilike(f'%{query}%') 
         )
 
-    product_page = product_query.paginate(page=page, per_page=5, error_out=False)
+    product_page = product_query.order_by(Produits.id_produit.desc()).paginate(page=page, per_page=5, error_out=False)
 
     return render_template('html/product/product.html', product=product_page, q=query)
 
@@ -512,8 +537,7 @@ def charts():
             Rapport_de_Compte.statut.ilike(f'%{query}%')
         )
 
-    charts_page = charts_query.paginate(page=page, per_page=5, error_out=False)
-
+    charts_page = charts_query.order_by(Rapport_de_Compte.id_rapport.desc()).paginate(page=page, per_page=5, error_out=False)
     return render_template('html/charts/charts.html', charts=charts_page, q=query)
 
 
@@ -541,6 +565,14 @@ def add_customer():
         if not quartier:
             flash("Le quartier de résidence est obligatoire.", "danger")
             return render_template("html/customers/add_customer.html")
+
+        client_existant = Client.query.filter(
+            Client.name.ilike(name)).first()
+                
+        if  client_existant:
+            flash ("Ce Client existe déjà!", "danger")
+            return redirect(url_for('add-customer'))
+        
 
         nouveau_client = Client(
             name=name,
@@ -607,7 +639,7 @@ def customers():
             Client.quartier_de_residence.ilike(f'%{query}%')
         )
 
-    customers_page = customers_query.paginate(page=page, per_page=5, error_out=False)
+    customers_page = customers_query.order_by(Client.id_client.desc()).paginate(page=page, per_page=5, error_out=False)
 
     return render_template('html/customers/customer.html', customers=customers_page, q=query)
 
@@ -667,7 +699,6 @@ def _lignes_commande(id_commande):
  
  
 def _calculer_statut(attendu, percue):
-    """payee / partielle / impayee, comme dans la liste des commandes."""
     if percue >= attendu and attendu > 0:
         return "payee"
     if percue > 0:
@@ -688,6 +719,7 @@ def add_orders():
         montant_percue = request.form.get("montant_percue", type=float) or 0
         ids_produits = request.form.getlist("id_produit")
         quantites = request.form.getlist("quantite")
+        types_vente = request.form.getlist("type_vente")
 
         if not id_client:
             flash("Le client est obligatoire.", "danger")
@@ -699,8 +731,8 @@ def add_orders():
 
         try:
             lignes = [
-                {"id_produit": int(id_produit), "quantite": int(quantite)}
-                for id_produit, quantite in zip(ids_produits, quantites)
+                {"id_produit": int(id_produit), "quantite": int(quantite), "type_vente": types_vente}
+                for id_produit, quantite in zip(ids_produits, quantites, types_vente)
                 if id_produit and quantite
             ]
         except ValueError:
@@ -1011,11 +1043,6 @@ def delivery_details_page(id_livraison):
         client=client,
         livreur=livreur
     )
-
-# @app.route("/dashboard.html")
-# @login_required
-# def dashboard():
-#     return render_template("html/dashboard.html")
 
 @app.route("/change-password.html", methods=["GET", "POST"])
 @login_required

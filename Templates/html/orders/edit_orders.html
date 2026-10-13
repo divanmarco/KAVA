@@ -7,7 +7,7 @@
 {% block page_subtitle %}Changez le client ou enregistrez un paiement.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary btn-sm" href="{{ url_for('orders_details', id_commande=commande.id_commande) }}">
+<a class="btn btn-secondary" href="{{ url_for('orders_details', id_commande=commande.id_commande) }}">
     <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
 </a>
 {% endblock %}
@@ -85,10 +85,10 @@
     </div>
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-gold btn-sm">
+        <button type="submit" class="btn btn-gold">
             <i class="bi bi-check-circle" aria-hidden="true"></i> Enregistrer
         </button>
-        <a class="btn btn-outline-secondary btn-sm"
+        <a class="btn btn-outline-secondary"
             href="{{ url_for('orders_details', id_commande=commande.id_commande) }}">
             Annuler
         </a>

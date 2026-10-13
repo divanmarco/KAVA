@@ -7,7 +7,7 @@
 {% block page_subtitle %}Mettez à jour les informations de la livraison.{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-outline-gold btn-sm" href="{{ url_for('delivery') }}">
+<a class="btn btn-outline-gold" href="{{ url_for('delivery') }}">
     <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
 </a>
 {% endblock %}
@@ -20,7 +20,7 @@
             <label for="id_commande" class="form-label">Commande</label>
             <select name="id_commande" id="id_commande" class="form-select" required>
                 {% for c in commandes %}
-                <option value="{{ c.id_commande }}" {% if delivery.id_commande == c.id_commande %}selected{% endif %}>
+                <option value="{{ c.id_commande }}" {% if delivery.id_commande==c.id_commande %}selected{% endif %}>
                     #{{ c.id_commande }}
                 </option>
                 {% endfor %}
@@ -31,7 +31,7 @@
             <label for="id_utilisateur" class="form-label">Livreur</label>
             <select name="id_utilisateur" id="id_utilisateur" class="form-select" required>
                 {% for l in livreurs %}
-                <option value="{{ l.id }}" {% if delivery.id_utilisateur == l.id %}selected{% endif %}>
+                <option value="{{ l.id }}" {% if delivery.id_utilisateur==l.id %}selected{% endif %}>
                     {{ l.name }}
                 </option>
                 {% endfor %}
@@ -46,8 +46,7 @@
 
         <div class="col-md-4">
             <label for="date_livraison_prevue" class="form-label">Date prévue</label>
-            <input type="datetime-local" name="date_livraison_prevue" id="date_livraison_prevue"
-                class="form-control"
+            <input type="datetime-local" name="date_livraison_prevue" id="date_livraison_prevue" class="form-control"
                 value="{{ delivery.date_livraison_prevue.strftime('%Y-%m-%dT%H:%M') }}" required>
         </div>
 
@@ -62,19 +61,21 @@
         <div class="col-md-4">
             <label for="statut" class="form-label">Statut</label>
             <select name="statut" id="statut" class="form-select" required>
-                <option value="en_cours" {% if delivery.statut not in ('livree', 'annulee') %}selected{% endif %}>En cours</option>
-                <option value="livree" {% if delivery.statut == 'livree' %}selected{% endif %}>Livrée</option>
-                <option value="annulee" {% if delivery.statut == 'annulee' %}selected{% endif %}>Annulée</option>
+                <option value="en_cours" {% if delivery.statut not in ('livree', 'annulee' ) %}selected{% endif %}>En
+                    cours</option>
+                <option value="livree" {% if delivery.statut=='livree' %}selected{% endif %}>Livrée</option>
+                <option value="annulee" {% if delivery.statut=='annulee' %}selected{% endif %}>Annulée</option>
             </select>
         </div>
 
     </div>
 
     <div class="d-flex justify-content-end gap-2 mt-4">
-        <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('delivery') }}">Annuler</a>
-        <button type="submit" class="btn btn-outline-gold btn-sm">
+        <button type="submit" class="btn btn-outline-gold">
             <i class="bi bi-check-lg" aria-hidden="true"></i> Mettre à jour
         </button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('delivery') }}">Annuler</a>
+
     </div>
 </form>
 {% endblock %}

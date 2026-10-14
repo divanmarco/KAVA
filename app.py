@@ -166,7 +166,7 @@ def login():
             flash("Seul le Gérant peut se connecter pour l'instant.", "warning")
         else:
             login_user(user)
-            flash(f"Bienvenue {user.name} !")
+            flash(f"Bienvenue {user.name} !", "info")
             return redirect(url_for('index'))
 
     return render_template('html/login.html')
@@ -199,10 +199,10 @@ def settings():
         user_tel = f.get("user_telephone", "").strip()
         seuil = f.get("seuil_alerte", type=int)
 
-        old_pw = f.get("old_password", "")                        # NOUVEAU
-        new_pw = f.get("new_password", "")                        # NOUVEAU
-        confirm_pw = f.get("confirm_password", "")                # NOUVEAU
-        change_pw = bool(new_pw or confirm_pw)                    # NOUVEAU
+        old_pw = f.get("old_password", "")                        
+        new_pw = f.get("new_password", "")                        
+        confirm_pw = f.get("confirm_password", "")                
+        change_pw = bool(new_pw or confirm_pw)                    
 
         if not name:
             flash("Le nom est obligatoire.", "danger")

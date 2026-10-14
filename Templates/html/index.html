@@ -54,7 +54,7 @@
   <div class="col-12 col-xl-3">
     <article class="metric-card metric-danger">
       <div class="metric-top">
-        <span class="metric-label text-danger">NOMBRE DE PRODUITS SOUS LE SEUIL</span>
+        <span class="metric-label text-danger">SEUIL ALERTE</span>
         <span class="metric-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
@@ -65,7 +65,8 @@
           </svg>
         </span>
       </div>
-      <div class="metric-value text-danger">{{ produits_alerte|length }}</div>
+      <div class="metric-value text-danger">{{ produits_alerte|length }}
+      </div>
       <div class="metric-meta">
         {% if produits_alerte %}
         Plus critique : {{ produits_alerte[0].name }}
@@ -93,7 +94,7 @@
   <div class="col-12 col-xl-6">
     <div class="panel h-100">
       <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-gold">Ratio des produits les plus vendus</h6>
+        <h6 class="metric-label font-weight-bold text-gold">RATIO DES PRODUITS VENDUS</h6>
       </div>
       <div class="panel-body">
         {% for p in ratios_produits %}
@@ -116,8 +117,8 @@
   <div class="col-12 col-xl-6">
     <div class="panel h-100">
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-gold">Commandes Récentes</h6>
-        <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout.</a>
+        <h6 class="metric-label font-weight-bold text-gold">Commandes Récentes</h6>
+        <a class="btn btn-gold btn-sm" href="{{ url_for('orders') }}">Voir tout</a>
       </div>
       <div class="panel-body">
         <div class="table-responsive">
@@ -141,13 +142,13 @@
                 </td>
                 <td>
                   {% if row.statut == 'payee' %}
-                  <span class="badge bg-success">Comptant</span>
+                  <span class="status text-success">Comptant</span>
                   {% elif row.statut == 'partielle' %}
-                  <span class="badge bg-warning text-dark">Partielle</span>
+                  <span class="status text-warning">Partielle</span>
                   {% elif row.statut == 'impayee' %}
-                  <span class="badge bg-danger">Crédit</span>
+                  <span class="status text-danger">Crédit</span>
                   {% else %}
-                  <span class="badge bg-light text-dark">En attente</span>
+                  <span class="status text-dark">En attente</span>
                   {% endif %}
                 </td>
                 <td>

@@ -27,12 +27,8 @@
     <div class="panel h-100">
       <div class="panel-header">
         <h2 class="h5 mb-1 section-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
-            viewBox="0 0 16 16">
-            <path
-              d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-          </svg>
-          <span>Profil de l'utilisateur ({{ current_user.role.value }})</span>
+          <i class="bi bi-person" aria-hidden="true"></i>
+          <span class="metric-label">Profil de l'utilisateur ({{ current_user.role.value }})</span>
         </h2>
       </div>
       <div class="mb-3">
@@ -50,13 +46,13 @@
     </div>
   </div>
 
-  <!-- ENTREPRISE -->
+
   <div class="col-12 col-xl-4">
     <div class="panel h-100">
       <div class="panel-header">
         <h2 class="h5 mb-1 section-title">
           <i class="bi bi-building" aria-hidden="true"></i>
-          <span>Informations de l'entreprise</span>
+          <span class="metric-label">Informations de l'entreprise</span>
         </h2>
       </div>
       <div class="mb-3">
@@ -74,13 +70,13 @@
     </div>
   </div>
 
-  <!-- STOCK -->
+
   <div class="col-12 col-xl-4">
     <div class="panel h-100">
       <div class="panel-header">
         <h2 class="h5 mb-1 section-title">
           <i class="bi bi-box-seam" aria-hidden="true"></i>
-          <span>Gestion du stock</span>
+          <span class="metric-label">Gestion du stock</span>
         </h2>
       </div>
       <div class="mb-3">
@@ -101,7 +97,7 @@
         {% if nb_faibles > 5 %}
         <p class="text-muted small mt-2 mb-0">et {{ nb_faibles - 5 }} autre(s) produit(s) sous le seuil.</p>
         {% endif %}
-        
+
         {% else %}
         <p class="text-success mb-0">Aucun produit sous le seuil.</p>
         {% endif %}
@@ -111,7 +107,7 @@
 
 </section>
 
-<!-- UN SEUL FORMULAIRE POUR TOUT MODIFIER -->
+
 <div class="modal fade" id="editSettingsModal" tabindex="-1" aria-labelledby="editSettingsModalLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">

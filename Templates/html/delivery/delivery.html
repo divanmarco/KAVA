@@ -49,12 +49,12 @@
                 <td>
                     {% if not row.id_livraison %}
                     <span class="badge bg-secondary">À planifier</span>
+
                     {% elif row.statut == 'livree' %}
                     <span class="badge bg-success">Livrée</span>
-                    {% elif row.statut == 'annulee' %}
-                    <span class="badge bg-danger">Annulée</span>
+
                     {% else %}
-                    <span class="badge bg-warning text-dark">En cours</span>
+                    <span class="badge bg-warning text-dark">Planifiée</span>
                     {% endif %}
                 </td>
                 <td class="text-end position-relative" style="z-index: 2;">
@@ -66,6 +66,19 @@
                     <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary">
                         <i class="bi bi-pencil"></i>
                     </a>
+                    {% if row.statut != 'livree' %}
+                    <a href="{{ url_for('livrer_commande', id_livraison=row.id_livraison) }}" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i>
+                    </a>
+                    {% endif %}
+                    {% if row.statut != 'livree' %}
+                    <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{{ url_for('livrer_commande', id_livraison=row.id_livraison) }}" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i>
+                    </a>
+                    {% endif %}
                     <!-- <button type="button" class="btn btn-gold delete-product-btn" data-bs-toggle="modal"
                         data-bs-target="#deleteModal"
                         data-item-name="Livraison n° {{ row.id_livraison }} ({{ row.client_name }})"
@@ -74,8 +87,7 @@
                         <i class="bi bi-trash"></i>
                     </button> -->
                     {% else %}
-                    <a href="{{ url_for('add_delivery', id_commande=row.id_commande) }}"
-                        class="btn btn-gold">
+                    <a href="{{ url_for('add_delivery', id_commande=row.id_commande) }}" class="btn btn-gold">
                         <i class="bi bi-calendar-plus"></i>
                     </a>
                     {% endif %}

@@ -99,6 +99,8 @@ class Commande(db.Model):
     id_commande = db.Column(db.Integer, primary_key=True)
     id_client = db.Column(db.Integer, db.ForeignKey("client.id_client"), nullable=False)
     name = db.Column(db.String(50), nullable=False)
+    
+
 
 
 
@@ -110,7 +112,10 @@ class Ligne_Commande(db.Model):
     id_produit = db.Column(db.Integer, db.ForeignKey("produits.id_produit"), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     quantite = db.Column(db.Integer, nullable=False, default=1, server_default="1")
+    type_vente = db.Column(db.String(10), nullable=False, default="unite", server_default="unite")  # ← nouveau
     prix_unitaire = db.Column(db.Numeric(10, 2), nullable=False, default=0, server_default="0")
+    
+    
 
 class Vente(db.Model):
     __tablename__ = "vente"
@@ -198,15 +203,22 @@ class Session(db.Model):
     )
     date_connexion = db.Column(db.DateTime, nullable=False)
 
+class Versement(db.Model):
+    __tablename__ = "versement"
 
-# class LoginForm(FlaskForm):
-#     username = StringField(
-#         validators=[DataRequired(), Length(min=4, max=20)],
-#         render_kw={"placeholder": "username", "id": "txt"}
-#     )
-#     password = PasswordField(
-#         validators=[DataRequired(), Length(min=4, max=20)],
-#         render_kw={"placeholder": "password", "id": "mdp", "class": "eye-icon"}
-#     )
-#     submit = SubmitField('Login')
+    id_versement = db.Column(db.Integer, primary_key=True)
+    id_vente = db.Column(db.Integer, db.ForeignKey("vente.id_vente"), nullable=False)
+    montant = db.Column(db.Numeric(10, 2), nullable=False)
+    date_versement = db.Column(db.DateTime, nullable=False)
+    id_utilisateur = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
+class Settings(db.Model):
+    __tablename__ = "parametres"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nom_entreprise = db.Column(db.String(100), nullable=False, default="")
+    telephone = db.Column(db.String(30), nullable=False, default="")
+    email = db.Column(db.String(120), nullable=False, default="")
+    adresse = db.Column(db.String(200), nullable=False, default="")
+    seuil_alerte = db.Column(db.Integer, nullable=False, default=5)
+    alerte_stock = db.Column(db.Boolean, nullable=False, default=True)

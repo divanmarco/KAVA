@@ -55,7 +55,9 @@
                 <td class="text-end">{{ [percue - attendu, 0] | max }}</td>
 
                 <td class="text-center">
-                    {% if row.statut == 'payee' %}
+                    {% if row.statut is none %}
+                    <span class="text-muted">Non vendue</span>
+                    {% elif row.statut == 'payee' %}
                     <span class="text-success">Comptant</span>
                     {% elif row.statut == 'partielle' %}
                     <span class="text-warning">Partielle</span>
@@ -65,7 +67,9 @@
                 </td>
 
                 <td class="text-center">
-                    {% if row.statut != 'payee' %}
+                    {% if row.statut is none %}
+                    <span class="badge bg-secondary">-</span>
+                    {% elif row.statut != 'payee' %}
                     <span class="text-warning">En attente de paiement</span>
                     {% elif row.mode_de_vente == 'a_livrer' %}
                     <span class="text-secondary">À livrer</span>
@@ -75,10 +79,15 @@
                     <span class="badge bg-secondary">-</span>
                     {% endif %}
                 </td>
-                
+
                 <td class="text-end position-relative" style="z-index: 2;">
+                    {% if row.statut is none %}
+                    <a href="{{ url_for('sell_order', id_commande=row.Commande.id_commande) }}" class="btn btn-gold"
+                        title="Enregistrer la vente"><i class="bi bi-cash-coin"></i></a>
+                    {% endif %}
+<!-- 
                     <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
-                        class="btn btn-gold"><i class="bi bi-eye"></i></a>
+                        class="btn btn-gold"><i class="bi bi-eye"></i></a> -->
 
                     <a href="{{ url_for('edit_orders', id_commande=row.Commande.id_commande) }}"
                         class="btn btn-secondary"><i class="bi bi-pencil"></i></a>

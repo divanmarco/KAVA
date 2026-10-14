@@ -5,15 +5,22 @@
 {% block page_icon %}<i class="bi bi-receipt"></i>{% endblock %}
 {% block page_title %}Détails de la commande n°{{ commande.id_commande }}{% endblock %}
 {% block page_subtitle %}Client, produits commandés et état du paiement.{% endblock %}
-
 {% block heading_actions %}
+{% if not vente %}
+<a class="btn btn-gold" href="{{ url_for('sell_order', id_commande=commande.id_commande) }}">
+    <i class="bi bi-cash-coin" aria-hidden="true"></i> Vendre
+</a>
 <a class="btn btn-gold" href="{{ url_for('edit_orders', id_commande=commande.id_commande) }}">
     <i class="bi bi-pencil" aria-hidden="true"></i> Modifier
 </a>
+{% elif vente.statut in ('partielle', 'impayee') %}
+<a class="btn btn-gold" href="{{ url_for('pay_order', id_commande=commande.id_commande) }}">
+    <i class="bi bi-cash-coin" aria-hidden="true"></i> Encaisser le reste
+</a>
+{% endif %}
 <a class="btn btn-outline-secondary" href="{{ url_for('orders') }}">
     <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
 </a>
-
 {% endblock %}
 
 {% block content %}
@@ -105,4 +112,27 @@
         </tbody>
     </table>
 </div>
+{% if versements %}
+<h2 class="h6 mt-4 mb-2">Versements</h2>
+<div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th class="text-end">Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in versements %}
+            <tr>
+                <td>{{ loop.index }}{% if loop.first %}{% endif %}</td>
+                <td>{{ v.date_versement.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td class="text-end"><strong>{{ v.montant }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
 {% endblock %}

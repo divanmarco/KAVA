@@ -1,0 +1,23 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Encaisser la commande n° {{ vente.id_commande }}{% endblock %}
+
+{% block page_icon %}<i class="bi bi-cash-coin"></i>{% endblock %}
+{% block page_title %}Commande #{{ vente.id_commande }}{% endblock %}
+{% block page_subtitle %}Ajoutez un versement pour solder la commande.{% endblock %}
+
+{% block content %}
+<p class="mb-1"><strong>Total attendu :</strong> {{ vente.montant_attendu }}</p>
+<p class="mb-1"><strong>Déjà perçu :</strong> {{ vente.montant_percue }}</p>
+<p class="mb-3"><strong>Reste à payer :</strong> {{ reste }}</p>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="montant" class="form-label">Complément</label>
+        <input class="form-control" type="number" id="montant" name="montant" step="0.01" min="0.01"
+            max="{{ reste }}" value="{{ reste }}" required>
+    </div>
+    <button type="submit" class="btn btn-gold">Enregistrer la vente</button>
+    <a href="{{ url_for('orders') }}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

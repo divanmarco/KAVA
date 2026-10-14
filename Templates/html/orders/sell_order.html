@@ -1,0 +1,58 @@
+{% extends "html/layout.html" %}
+
+{% block title %}Vendre la commande n° {{ commande.id_commande }}{% endblock %}
+
+{% block page_icon %}<i class="bi bi-cash-coin"></i>{% endblock %}
+{% block page_title %}Vente de la commande n° {{ commande.id_commande }}{% endblock %}
+{% block page_subtitle %}Enregistrez le paiement et l'action à mener.{% endblock %}
+
+{% block content %}
+<table class="table table-sm mb-3">
+    <thead>
+        <tr><th>Produit</th><th class="text-end">Quantité</th><th class="text-end">Prix unitaire</th><th class="text-end">Sous-total</th></tr>
+    </thead>
+    <tbody>
+        {% for l in lignes %}
+        <tr>
+            <td>{{ l.name }}</td>
+            <td class="text-end">{{ l.quantite }}</td>
+            <td class="text-end">{{ l.prix_unitaire }}</td>
+            <td class="text-end">{{ l.quantite * l.prix_unitaire }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p><strong>Total attendu :</strong> <span id="attendu">{{ attendu }}</span></p>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="montant_percue" class="form-label">Montant perçu</label>
+        <input class="form-control" type="number" id="montant_percue" name="montant_percue" step="0.01" min="0" value="0">
+    </div>
+    <div class="mb-3">
+        <label for="mode_vente" class="form-label">Action à mener</label>
+        <select class="form-select" id="mode_vente" name="mode_vente" required>
+            <option value="">Choisir une action</option>
+            <option value="a_servir">À servir</option>
+            <option value="a_livrer">À livrer</option>
+        </select>
+    </div>
+    <p class="mb-1"><strong>Reste à payer :</strong> <span id="calc-reste">{{ attendu }}</span></p>
+    <p class="mb-3"><strong>Remboursement :</strong> <span id="calc-rembours">0</span></p>
+    <button type="submit" class="btn btn-gold">Enregistrer la vente</button>
+    <a href="{{ url_for('orders') }}" class="btn btn-secondary">Annuler la vente</a>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const attendu = parseFloat("{{ attendu }}") || 0;
+    const percueInput = document.getElementById("montant_percue");
+    function fmt(n) { return n.toLocaleString("fr-FR", { maximumFractionDigits: 2 }); }
+    percueInput.addEventListener("input", function () {
+        const percue = parseFloat(percueInput.value) || 0;
+        document.getElementById("calc-reste").textContent = fmt(Math.max(attendu - percue, 0));
+        document.getElementById("calc-rembours").textContent = fmt(Math.max(percue - attendu, 0));
+    });
+</script>
+{% endblock %}

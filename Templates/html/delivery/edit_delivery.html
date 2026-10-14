@@ -50,15 +50,15 @@
                 value="{{ delivery.date_livraison_prevue.strftime('%Y-%m-%dT%H:%M') }}" required>
         </div>
 
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
             <label for="date_livraison_effective" class="form-label">Date effective</label>
             <input type="datetime-local" name="date_livraison_effective" id="date_livraison_effective"
                 class="form-control"
                 value="{{ delivery.date_livraison_effective.strftime('%Y-%m-%dT%H:%M') if delivery.date_livraison_effective else '' }}">
             <div class="form-text">À renseigner quand la livraison est effectuée.</div>
-        </div>
+        </div> -->
 
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
             <label for="statut" class="form-label">Statut</label>
             <select name="statut" id="statut" class="form-select" required>
                 <option value="en_cours" {% if delivery.statut not in ('livree', 'annulee' ) %}selected{% endif %}>En
@@ -66,7 +66,8 @@
                 <option value="livree" {% if delivery.statut=='livree' %}selected{% endif %}>Livrée</option>
                 <option value="annulee" {% if delivery.statut=='annulee' %}selected{% endif %}>Annulée</option>
             </select>
-        </div>
+        </div> -->
+        
 
     </div>
 

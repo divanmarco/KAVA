@@ -93,7 +93,7 @@
   <div class="col-12 col-xl-6">
     <div class="panel h-100">
       <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-gold">Produits les plus vendus</h6>
+        <h6 class="m-0 font-weight-bold text-gold">Ratio des produits les plus vendus</h6>
       </div>
       <div class="panel-body">
         {% for p in ratios_produits %}
@@ -147,7 +147,7 @@
                   {% elif row.statut == 'impayee' %}
                   <span class="badge bg-danger">Crédit</span>
                   {% else %}
-                  <span class="badge bg-light text-dark">Sans vente</span>
+                  <span class="badge bg-light text-dark">En attente</span>
                   {% endif %}
                 </td>
                 <td>

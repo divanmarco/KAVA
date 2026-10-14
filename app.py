@@ -1,7 +1,7 @@
 from decimal import Decimal, InvalidOperation
 import email
-from http import client
-from commande import creer_commande, StockInsuffisant
+import re
+from commande import creer_commande, vendre_commande, total_commande, completer_paiement, StockInsuffisant
 from flask import Flask, render_template, redirect , request, session , url_for, flash
 from pymysql import IntegrityError
 from config import Config
@@ -12,13 +12,12 @@ from models import User,Produits
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 import secrets
-from sqlalchemy import or_
-from models import Livraison, Commande, Client, User, RoleEnum
+from models import Livraison, Commande, Client, User, RoleEnum,Versement,Settings
 from sqlalchemy import func
 from datetime import datetime
 from models import Commentaire
 from models import Rapport_de_Compte
-from constants import STATUTS_VENTE, MODES_VENTE,SEUIL_ALERTE
+from constants import MODES_VENTE,SEUIL_ALERTE
 
 
 app = Flask(__name__)
@@ -160,8 +159,9 @@ def login():
         password = request.form.get('password')
 
         user = User.query.filter_by(name=name).first()
-        if not user or user.email != password:
+        if not user or not check_password_hash(user.mot_de_passe, password):
             flash("Nom d'utilisateur ou mot de passe incorrect.", "danger")
+
         elif user.role.value  != 'Gérant':
             flash("Seul le Gérant peut se connecter pour l'instant.", "warning")
         else:
@@ -180,10 +180,91 @@ def logout():
     flash("Vous avez été déconnecté avec succès.", "info")
     return redirect(url_for('login'))
 
-
 @app.route("/settings.html", methods=["GET", "POST"])
+@login_required
 def settings():
-    return render_template("html/settings.html")
+
+    params = db.session.get(Settings, 1)
+
+    if params is None:
+        params = Settings(id=1)
+        db.session.add(params)
+        db.session.commit()
+
+    if request.method == "POST":
+
+        f = request.form
+
+        name = f.get("name", "").strip()
+        user_tel = f.get("user_telephone", "").strip()
+        seuil = f.get("seuil_alerte", type=int)
+
+        old_pw = f.get("old_password", "")                        # NOUVEAU
+        new_pw = f.get("new_password", "")                        # NOUVEAU
+        confirm_pw = f.get("confirm_password", "")                # NOUVEAU
+        change_pw = bool(new_pw or confirm_pw)                    # NOUVEAU
+
+        if not name:
+            flash("Le nom est obligatoire.", "danger")
+
+        elif User.query.filter(
+            User.name == name,
+            User.id != current_user.id
+        ).first():
+            flash("Ce nom est déjà utilisé.", "danger")
+
+        elif (
+            user_tel and
+            not re.fullmatch(r"\+?[0-9 ]{6,20}", user_tel)
+        ):
+            flash("Numéro de téléphone invalide.", "danger")
+
+        elif seuil is None or seuil < 1:
+            flash("Le seuil d'alerte doit être au moins égal à 1.", "danger")
+
+        elif change_pw and not (old_pw and new_pw and confirm_pw):   # NOUVEAU
+            flash("Pour changer le mot de passe, remplis les trois champs.", "danger")
+
+        elif change_pw and new_pw != confirm_pw:                     # NOUVEAU
+            flash("Les nouveaux mots de passe ne correspondent pas.", "danger")
+
+        elif change_pw and not check_password_hash(                  # NOUVEAU
+            current_user.mot_de_passe, old_pw
+        ):
+            flash("Le mot de passe actuel est incorrect.", "danger")
+
+        else:
+
+            current_user.name = name
+            current_user.telephone = user_tel if user_tel else None
+
+            if change_pw:                                            # NOUVEAU
+                current_user.mot_de_passe = generate_password_hash(new_pw)
+
+            params.nom_entreprise = f.get("nom_entreprise", "").strip()
+            params.telephone = f.get("telephone", "").strip()
+            params.email = f.get("email", "").strip()
+            params.seuil_alerte = seuil
+
+            db.session.commit()
+
+            flash("Paramètres enregistrés avec succès.", "success")
+
+        return redirect(url_for("settings"))
+    faibles = Produits.query.filter(Produits.quantite_en_stock < params.seuil_alerte)
+    nb_faibles = faibles.count()
+    produits_faibles = (
+        faibles.order_by(Produits.quantite_en_stock.asc(), Produits.name)
+        .limit(5)
+        .all()
+    )
+
+    return render_template(
+        "html/settings.html",
+        settings=params,
+        produits_faibles=produits_faibles,
+        nb_faibles=nb_faibles,
+    )
 
 
 @app.route("/forgot-password.html", methods=["GET", "POST"])
@@ -195,6 +276,25 @@ def forgot_password():
 def profile():
     return redirect(url_for("index"))
 
+
+@app.route("/profile/update", methods=["POST"])
+@login_required
+def update_profile():
+    name = request.form.get("name", "").strip()
+    telephone = request.form.get("telephone", "").strip()
+
+    if not name:
+        flash("Le nom est obligatoire.", "danger")
+    elif User.query.filter(User.name == name, User.id != current_user.id).first():
+        flash("Ce nom est déjà utilisé.", "danger")
+    elif telephone and not re.fullmatch(r"\+?[0-9 ]{6,20}", telephone):
+        flash("Numéro de téléphone invalide.", "danger")
+    else:
+        current_user.name = name
+        current_user.telephone = telephone or None
+        db.session.commit()
+        flash("Informations mises à jour.", "success")
+    return redirect(url_for("settings"))
 
 # Users Management Routes
 @app.route("/add-user.html", methods=["GET", "POST"])
@@ -715,8 +815,6 @@ def add_orders():
 
     if request.method == "POST":
         id_client = request.form.get("id_client", type=int)
-        mode_vente = request.form.get("mode_vente")
-        montant_percue = request.form.get("montant_percue", type=float) or 0
         ids_produits = request.form.getlist("id_produit")
         quantites = request.form.getlist("quantite")
         types_vente = request.form.getlist("type_vente")
@@ -725,14 +823,10 @@ def add_orders():
             flash("Le client est obligatoire.", "danger")
             return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
-        if mode_vente not in MODES_VENTE:
-            flash("Le mode de vente est obligatoire.", "danger")
-            return render_template("html/orders/add_orders.html", customers=customers, products=products)
-
         try:
             lignes = [
-                {"id_produit": int(id_produit), "quantite": int(quantite), "type_vente": types_vente}
-                for id_produit, quantite in zip(ids_produits, quantites, types_vente)
+                {"id_produit": int(id_produit), "quantite": int(quantite), "type_vente": type_vente}
+                for id_produit, quantite, type_vente in zip(ids_produits, quantites, types_vente)
                 if id_produit and quantite
             ]
         except ValueError:
@@ -744,14 +838,8 @@ def add_orders():
                 id_client=id_client,
                 lignes=lignes,
                 id_utilisateur=current_user.id,
-                mode_vente=mode_vente,
-                montant_percue=montant_percue,
             )
-
-        except StockInsuffisant as e:
-            flash(str(e), "danger")
-            return render_template("html/orders/add_orders.html", customers=customers, products=products)
-        except ValueError as e:
+        except (StockInsuffisant, ValueError) as e:
             flash(str(e), "danger")
             return render_template("html/orders/add_orders.html", customers=customers, products=products)
         except IntegrityError:
@@ -759,7 +847,7 @@ def add_orders():
             return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
         flash("Commande enregistrée avec succès.", "success")
-        return redirect(url_for("add_orders"))
+        return redirect(url_for("orders"))
 
     return render_template("html/orders/add_orders.html", customers=customers, products=products)
 
@@ -778,6 +866,11 @@ def orders_details(id_commande):
         remboursement = max(vente.montant_percue - vente.montant_attendu, 0)
         reste_a_payer = max(vente.montant_attendu - vente.montant_percue, 0)
 
+    versements = []
+    if vente:
+        versements = (Versement.query.filter_by(id_vente=vente.id_vente)
+                  .order_by(Versement.date_versement).all())
+
     return render_template(
         "html/orders/orders_details.html",
         commande=commande,
@@ -787,11 +880,16 @@ def orders_details(id_commande):
         total=total,
         remboursement=remboursement,
         reste_a_payer=reste_a_payer,
+        versements=versements,
     )
 
 @app.route("/orders/edit/<int:id_commande>", methods=["GET", "POST"])
 @login_required
 def edit_orders(id_commande):
+    if Vente.query.filter_by(id_commande=id_commande).first():
+        flash("Cette commande a déjà été vendue!", "warning")
+        return redirect(url_for("orders"))
+    
     commande = Commande.query.get_or_404(id_commande)
     vente = Vente.query.filter_by(id_commande=id_commande).first()
     customers = Client.query.order_by(Client.name).all()
@@ -891,6 +989,57 @@ def orders():
     )
     return render_template("html/orders/orders.html", orders=commandes, q=q)
 
+from commande import creer_commande, vendre_commande, total_commande, StockInsuffisant
+
+@app.route("/orders/<int:id_commande>/vendre.html", methods=["GET", "POST"])
+@login_required
+def sell_order(id_commande):
+    commande = db.session.get(Commande, id_commande)
+    if commande is None:
+        flash("Commande introuvable.", "danger")
+        return redirect(url_for("orders"))
+
+    if request.method == "POST":
+        try:
+            vendre_commande(
+                id_commande=id_commande,
+                id_utilisateur=current_user.id,
+                mode_vente=request.form.get("mode_vente"),
+                montant_percue=request.form.get("montant_percue", type=float) or 0,
+            )
+        except ValueError as e:
+            flash(str(e), "danger")
+        else:
+            flash("Vente enregistrée avec succès.", "success")
+            return redirect(url_for("orders"))
+
+    lignes = Ligne_Commande.query.filter_by(id_commande=id_commande).all()
+    return render_template("html/orders/sell_order.html", commande=commande,
+                           lignes=lignes, attendu=total_commande(id_commande))
+
+from commande import creer_commande, vendre_commande, total_commande, completer_paiement, StockInsuffisant
+
+@app.route("/orders/<int:id_commande>/encaisser.html", methods=["GET", "POST"])
+@login_required
+def pay_order(id_commande):
+    vente = Vente.query.filter_by(id_commande=id_commande).first()
+    if vente is None:
+        flash("Cette commande n'a pas encore été vendue.", "warning")
+        return redirect(url_for("orders"))
+    if vente.statut == "payee":
+        flash("Cette commande est déjà entièrement payée.", "info")
+        return redirect(url_for("orders"))
+
+    if request.method == "POST":
+        try:
+            completer_paiement(id_commande, request.form.get("montant", type=float), current_user.id)
+        except ValueError as e:
+            flash(str(e), "danger")
+        else:
+            flash("Versement enregistré.", "success")
+            return redirect(url_for("orders"))
+
+    return render_template("html/orders/pay_order.html", vente=vente,reste=vente.montant_attendu - vente.montant_percue)
 
 # Delivery roads
 @app.route('/delivery')
@@ -922,12 +1071,10 @@ def delivery():
     deliveries = query.order_by(Commande.id_commande.desc()).paginate(
         page=page, per_page=5, error_out=False
     )
+    print("LIVRAISONS :", deliveries.total, [r.id_commande for r in deliveries.items])
     return render_template('html/delivery/delivery.html', deliveries=deliveries, q=q)
 
-@app.route('/delivery/<int:id>')
-def hello():
-    return render_template('html/delivery/add_delivery.html', command = "IDRIS")
-    
+
 
 @app.route('/delivery/<int:id_livraison>/delete', methods=['POST'])
 @login_required
@@ -944,7 +1091,6 @@ def delete_delivery(id_livraison):
     return redirect(url_for('delivery'))
 
 def _parse_dt(value):
-    """'2026-10-01T14:30' (datetime-local) -> datetime, ou None si vide."""
     return datetime.strptime(value, "%Y-%m-%dT%H:%M") if value else None
 
 @app.route('/add_delivery', methods=['GET', 'POST'])
@@ -1007,8 +1153,14 @@ def add_delivery():
 @login_required
 def edit_delivery(id_livraison):
     livraison = Livraison.query.get_or_404(id_livraison)
+    if livraison.statut == "livree":
+        flash(
+            "Cette livraison a déjà été effectuée et ne peut plus être modifiée.",
+            "warning"
+        )
+        return redirect(url_for('delivery'))
     commandes = Commande.query.order_by(Commande.id_commande.desc()).all()
-    livreurs = User.query.filter_by(role=RoleEnum.LIVREUR).order_by(User.name).all()  # gardez le nom d'enum corrigé
+    livreurs = User.query.filter_by(role=RoleEnum.LIVREUR).order_by(User.name).all() 
 
     if request.method == "POST":
         try:
@@ -1043,6 +1195,27 @@ def delivery_details_page(id_livraison):
         client=client,
         livreur=livreur
     )
+
+
+@app.route('/livrer_commande/<int:id_livraison>')
+@login_required
+def livrer_commande(id_livraison):
+
+    livraison = Livraison.query.get_or_404(id_livraison)
+
+    if livraison.statut == "livree":
+        flash("Cette livraison a déjà été effectuée.", "warning")
+        return redirect(url_for('delivery'))
+
+    livraison.statut = "livree"
+    livraison.date_livraison_effective = datetime.now()
+
+    db.session.commit()
+
+    flash("Livraison effectuée avec succès.", "success")
+
+    return redirect(url_for('delivery'))
+
 
 @app.route("/change-password.html", methods=["GET", "POST"])
 @login_required

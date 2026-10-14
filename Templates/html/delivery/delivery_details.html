@@ -2,68 +2,90 @@
 
 {% block title %}Détails livraison | adminHMD{% endblock %}
 
-{% block page_icon %}<i class="bi bi-truck"></i>{% endblock %}
-{% block page_title %}Livraison #{{ delivery.id }}{% endblock %}
-{% block page_subtitle %}Détails de la livraison.{% endblock %}
+{% block page_icon %}
+<i class="bi bi-truck"></i>
+{% endblock %}
+
+{% block page_title %}
+Livraison #{{ livraison.id }}
+{% endblock %}
+
+{% block page_subtitle %}
+Détails de la livraison.
+{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-outline-gold" href="{{ url_for('edit_delivery', id_livraison=delivery.id) }}">
-    <i class="bi bi-pencil" aria-hidden="true"></i> Modifier
-</a>
-<a class="btn btn-outline-secondary" href="{{ url_for('delivery') }}">
-    <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
-</a>
+{% if livraison.statut != 'livree' %}
 
+<a class="btn btn-outline-gold" href="{{ url_for('edit_delivery', id_livraison=livraison.id) }}">
+    <i class="bi bi-pencil" aria-hidden="true"></i>
+    Modifier
+</a>
+{% endif %}
+
+<a class="btn btn-outline-secondary" href="{{ url_for('delivery') }}">
+    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+    Retour
+</a>
 {% endblock %}
 
 {% block content %}
 <div class="table-responsive">
     <table class="table align-middle">
         <tbody>
-            <tr>
+
+            <!-- <tr>
                 <th style="width: 220px;">N° de livraison</th>
-                <td>{{ delivery.id }}</td>
-            </tr>
+                <td>{{ livraison.id }}</td>
+            </tr> -->
+
             <tr>
                 <th>Commande</th>
                 <td>
-                    <a href="{{ url_for('orders_details', id_commande=delivery.id_commande) }}">
-                        #{{ delivery.id_commande }}
+                    <a href="{{ url_for('orders_details',
+                        id_commande=livraison.id_commande) }}">
+                        #{{ livraison.id_commande }}
                     </a>
                 </td>
             </tr>
+
             <tr>
                 <th>Client</th>
                 <td>{{ client.name }}</td>
             </tr>
+
             <tr>
                 <th>Livreur</th>
-                <td>{{ livreur_name }}</td>
+                <td>{{ livreur.name }}</td>
             </tr>
+
             <tr>
                 <th>Adresse de livraison</th>
-                <td>{{ delivery.adresse_livraison }}</td>
+                <td>{{ livraison.adresse_livraison }}</td>
             </tr>
+
             <tr>
                 <th>Date prévue</th>
-                <td>{{ delivery.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ livraison.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') if livraison.date_livraison_prevue
+                    else '-' }}</td>
             </tr>
             <tr>
                 <th>Date effective</th>
-                <td>{{ delivery.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if delivery.date_livraison_effective else '-' }}</td>
+                <td>{{ livraison.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if
+                    livraison.date_livraison_effective else '-' }}</td>
             </tr>
+
             <tr>
                 <th>Statut</th>
                 <td>
-                    {% if delivery.statut == 'livree' %}
+                    {% if livraison.statut == 'livree' %}
                     <span class="badge bg-success">Livrée</span>
-                    {% elif delivery.statut == 'annulee' %}
-                    <span class="badge bg-danger">Annulée</span>
                     {% else %}
-                    <span class="badge bg-warning text-dark">En cours</span>
+                    <span class="badge bg-warning text-dark">Planifiée</span>
                     {% endif %}
                 </td>
             </tr>
+
         </tbody>
     </table>
 </div>

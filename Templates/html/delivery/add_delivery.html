@@ -11,7 +11,6 @@
     <i class="bi bi-arrow-left" aria-hidden="true"></i> Retour
 </a>
 {% endblock %}
-
 {% block content %}
 <form method="POST" action="{{ url_for('add_delivery', id_commande=cmd.id_commande) }}">
     <div class="row g-3">
@@ -19,7 +18,7 @@
             <label for="id_utilisateur" class="form-label">Livreur</label>
             <select name="id_utilisateur" id="id_utilisateur" class="form-select" required>
                 <option value="" disabled {% if not form.get('id_utilisateur') %}selected{% endif %}>
-                    -- Choisir un livreur --
+                    Choisir un livreur
                 </option>
                 {% for livreur in livreurs %}
                 <option value="{{ livreur.id }}" {% if form.get('id_utilisateur')|string==livreur.id|string %}selected{%
@@ -41,20 +40,13 @@
             <input type="datetime-local" id="date_livraison_prevue" name="date_livraison_prevue" class="form-control"
                 value="{{ form.get('date_livraison_prevue', '') }}" required>
         </div>
-
-        <div class="col-md-6">
-            <label class="form-label">Statut</label>
-            <div class="form-control bg-light">En cours</div>
-        </div>
-
     </div>
 
     <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="submit" class="btn btn-gold">
             <i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer
         </button>
-        <a class="btn btn-secondary" href="{{ url_for('delivery') }}">Annuler</a>
-        
+        <a class="btn btn-secondary" href="{{ url_for('delivery') }}">Annuler</a> 
     </div>
 </form>
 {% endblock %}

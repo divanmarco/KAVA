@@ -19,9 +19,8 @@
             value="{{ q }}">
     </form>
 </div>
-
 <div class="table-responsive">
-    <table class="table align-middle">
+    <table class="table align-middle table-cards">
         <thead>
             <tr>
                 <th>N°</th>
@@ -41,20 +40,21 @@
             {% set attendu = row.montant_attendu or 0 %}
             {% set percue = row.montant_percue or 0 %}
             <tr class="position-relative">
-                <td>
+                <td data-label="N°">
                     <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
                         class="stretched-link text-decoration-none text-dark">
                         {{ row.Commande.id_commande }}
                     </a>
                 </td>
-                <td>{{ row.client_name }}</td>
-                <td>{{ row.date_vente.strftime('%d/%m/%Y %H:%M') if row.date_vente else '-' }}</td>
-                <td class="text-end">{{ attendu }}</td>
-                <td class="text-end">{{ percue }}</td>
-                <td class="text-end">{{ attendu - percue }}</td>
-                <td class="text-end">{{ [percue - attendu, 0] | max }}</td>
+                <td data-label="Client">{{ row.client_name }}</td>
+                <td data-label="Date/Heure">{{ row.date_vente.strftime('%d/%m/%Y %H:%M') if row.date_vente else '-' }}
+                </td>
+                <td data-label="Montant attendu" class="text-end">{{ attendu }}</td>
+                <td data-label="Montant perçu" class="text-end">{{ percue }}</td>
+                <td data-label="Reste à payer" class="text-end">{{ attendu - percue }}</td>
+                <td data-label="Remboursement" class="text-end mobile-hide">{{ [percue - attendu, 0] | max }}</td>
 
-                <td class="text-center">
+                <td data-label="Statut" class="text-center">
                     {% if row.statut is none %}
                     <span class="text-muted">Non vendue</span>
                     {% elif row.statut == 'payee' %}
@@ -66,7 +66,7 @@
                     {% endif %}
                 </td>
 
-                <td class="text-center">
+                <td data-label="Action à mener" class="text-center">
                     {% if row.statut is none %}
                     <span class="badge bg-secondary">-</span>
                     {% elif row.statut != 'payee' %}
@@ -80,12 +80,12 @@
                     {% endif %}
                 </td>
 
-                <td class="text-end position-relative" style="z-index: 2;">
+                <td data-label="" class="text-end position-relative" style="z-index: 2;">
                     {% if row.statut is none %}
                     <a href="{{ url_for('sell_order', id_commande=row.Commande.id_commande) }}" class="btn btn-gold"
                         title="Enregistrer la vente"><i class="bi bi-cash-coin"></i></a>
                     {% endif %}
-<!-- 
+                    <!--
                     <a href="{{ url_for('orders_details', id_commande=row.Commande.id_commande) }}"
                         class="btn btn-gold"><i class="bi bi-eye"></i></a> -->
 
@@ -103,7 +103,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="9" class="text-center">Aucune commande trouvée.</td>
+                <td colspan="10" class="text-center">Aucune commande trouvée.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -116,15 +116,15 @@
         <ul class="pagination pagination-sm mb-0">
             {% if orders.has_prev %}
             <li class="page-item"><a class="page-link"
-                    href="{{ url_for('orders', page=orders.prev_num, q=q) }}">Previous</a></li>
+                    href="{{ url_for('orders', page=orders.prev_num, q=q) }}">Précédent</a></li>
             {% else %}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            <li class="page-item disabled"><span class="page-link">Précédent</span></li>
             {% endif %}
             {% if orders.has_next %}
             <li class="page-item"><a class="page-link"
-                    href="{{ url_for('orders', page=orders.next_num, q=q) }}">Next</a></li>
+                    href="{{ url_for('orders', page=orders.next_num, q=q) }}">Suivant</a></li>
             {% else %}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
             {% endif %}
         </ul>
     </nav>

@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="row g-0">
+<section class="row g-3">
 
   <div class="col-12 col-xl-4">
     <div class="panel h-100">
@@ -110,7 +110,7 @@
 
 <div class="modal fade" id="editSettingsModal" tabindex="-1" aria-labelledby="editSettingsModalLabel"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg modal-fullscreen-sm-down">
     <form class="modal-content" method="POST" action="{{ url_for('settings') }}">
       <div class="modal-header">
         <h5 class="modal-title" id="editSettingsModalLabel">Modifier les paramètres</h5>

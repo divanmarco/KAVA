@@ -223,60 +223,151 @@ input {
 /* ===== Responsive KAVA ===== */
 
 /* Permet aux tableaux de se faire défiler au lieu d'élargir la page */
-.admin-main { min-width: 0; }
+.admin-main {
+    min-width: 0;
+}
 
 /* Tablettes et téléphones (moins de 992 px) : la barre latérale devient un tiroir */
 @media (max-width: 991.98px) {
-  .admin-shell { display: block !important; }
+    .admin-shell {
+        display: block !important;
+    }
 
-  .admin-main {
-    margin-left: 0 !important;
-    width: 100% !important;
-  }
+    .admin-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
 
-  .admin-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 260px;
-    max-width: 85vw;
-    overflow-y: auto;
-    transform: translateX(-100%);
-    transition: transform .25s ease;
-    z-index: 1045;
-  }
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 260px;
+        max-width: 85vw;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        z-index: 1045;
+    }
 
-  .sidebar-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, .5);
-    z-index: 1040;
-  }
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .5);
+        z-index: 1040;
+    }
 
-  body.sidebar-open .admin-sidebar { transform: translateX(0); }
-  body.sidebar-open .sidebar-backdrop { display: block; }
-  body.sidebar-open { overflow: hidden; }   /* fige la page derrière le menu */
+    body.sidebar-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    body.sidebar-open .sidebar-backdrop {
+        display: block;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
+
+    /* fige la page derrière le menu */
 }
 
 /* Téléphones (moins de 576 px) */
 @media (max-width: 575.98px) {
-  .heading-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
-  }
+    .heading-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
 
-  .heading-actions .btn,
-  .heading-actions form { width: 100%; }
+    .heading-actions .btn,
+    .heading-actions form {
+        width: 100%;
+    }
 
-  .admin-footer span { display: block; }
+    .admin-footer span {
+        display: block;
+    }
 
-  .table { font-size: .875rem; }
+    .table {
+        font-size: .875rem;
+    }
 
-  .modal-dialog { margin: .5rem; }
+    .modal-dialog {
+        margin: .5rem;
+    }
 
-  /* Empêche l'iPhone de zoomer quand on touche un champ */
-  input, select, textarea { font-size: 16px !important; }
+    /* Empêche l'iPhone de zoomer quand on touche un champ */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .table-cards thead {
+        display: none;
+    }
+
+    .table-cards,
+    .table-cards tbody,
+    .table-cards tr,
+    .table-cards td {
+        display: block;
+        width: 100%;
+    }
+
+    .table-cards tr {
+        border: 1px solid rgba(0, 0, 0, .08);
+        border-radius: 12px;
+        padding: .5rem .75rem;
+        margin-bottom: .75rem;
+        background: #fff;
+    }
+
+    .table-cards td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: .4rem 0;
+        border: 0;
+        text-align: right;
+    }
+
+    .table-cards td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6c757d;
+        text-align: left;
+        flex-shrink: 0;
+    }
+
+    /* Cellule des boutons : pas de titre, boutons regroupés à droite */
+    .table-cards td[data-label=""] {
+        justify-content: flex-end;
+        gap: .5rem;
+    }
+
+    .table-cards td[data-label=""]::before {
+        content: none;
+    }
+
+    /* Ligne « Aucun résultat » */
+    .table-cards td[colspan] {
+        display: block;
+        text-align: center;
+    }
+
+    .table-cards td[colspan]::before {
+        content: none;
+    }
+
+    /* Colonnes secondaires cachées sur téléphone */
+    .table-cards .mobile-hide {
+        display: none !important;
+    }
 }

@@ -29,7 +29,7 @@
   </form>
 </div>
 <div class="table-responsive">
-  <table class="table align-middle" id="usersTable" data-searchable-table>
+  <table class="table align-middle table-cards" id="usersTable" data-searchable-table>
     <thead>
       <tr>
         <th>Nom</th>
@@ -46,21 +46,21 @@
       {% for user in users.items %}
 
       <tr class="position-relative">
-        <td>
+        <td data-label="Nom">
           <a href="{{ url_for('user_details', id=user.id) }}" class="stretched-link text-decoration-none text-dark">
             {{ user.name }}
           </a>
         </td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.matricule }}</td>
-        <td>{{ user.telephone }}</td>
-        <td>{{ user.role.value }}</td>
-        <td>{{ user.ville }}</td>
-        <td
+        <td data-label="Email">{{ user.email }}</td>
+        <td data-label="Matricule">{{ user.matricule }}</td>
+        <td data-label="Téléphone">{{ user.telephone }}</td>
+        <td data-label="Rôle">{{ user.role.value }}</td>
+        <td data-label="Ville">{{ user.ville }}</td>
+        <td data-label="Statut"
           class="status {{ 'text-success' if user.status == 'Actif' else 'text-danger' if user.status == 'Bloqué' else 'text-secondary' if user.status == 'Inactif' else 'text-warning' }}">
           {{ user.status }}
         </td>
-        <td class="text-end position-relative" style="z-index: 2;">
+        <td data-label="" class="text-end position-relative" style="z-index: 2;">
           <a href="{{ url_for('user_details', id=user.id) }}" class="btn btn-gold"><i class="bi bi-eye"></i></a>
           <a href="{{ url_for('edit_user', id=user.id) }}" class="btn btn-secondary"><i class="bi bi-pencil"></i></a>
           <!-- <button type="button" class="btn btn-gold delete-user-btn" data-bs-toggle="modal"
@@ -85,15 +85,15 @@
   <nav aria-label="Users pagination">
     <ul class="pagination pagination-sm mb-0">
       {% if users.has_prev %}
-      <li class="page-item"><a class="page-link" href="{{ url_for('users', page=users.prev_num, q=q) }}">Previous</a>
+      <li class="page-item"><a class="page-link" href="{{ url_for('users', page=users.prev_num, q=q) }}">Précédent</a>
       </li>
       {% else %}
-      <li class="page-item disabled"><a class="page-link btn disabled" href="">Previous</a></li>
+      <li class="page-item disabled"><a class="page-link btn disabled" href="">Précédent</a></li>
       {% endif %}
       {% if users.has_next %}
-      <li class="page-item"><a class="page-link" href="{{ url_for('users', page=users.next_num, q=q) }}">Next</a></li>
+      <li class="page-item"><a class="page-link" href="{{ url_for('users', page=users.next_num, q=q) }}">Suivant</a></li>
       {% else %}
-      <li class="page-item disabled"><a class="page-link btn disabled" href="">Next</a></li>
+      <li class="page-item disabled"><a class="page-link btn disabled" href="">Suivant</a></li>
       {% endif %}
     </ul>
   </nav>

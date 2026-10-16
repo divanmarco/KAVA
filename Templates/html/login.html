@@ -43,6 +43,36 @@
             flex-direction: column;
             justify-content: center;
         }
+
+        /* Téléphones et petites tablettes : on cache le logo, le formulaire prend toute la place */
+        @media (max-width: 768px) {
+            .login-image {
+                display: none;
+            }
+
+            body {
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                /* hauteur réelle sur iPhone, barre Safari comprise */
+                padding: 1rem;
+            }
+
+            .login-card {
+                border-radius: 12px;
+            }
+
+            .login-form-panel {
+                padding: 1.5rem;
+            }
+
+            /* Empêche l'iPhone de zoomer quand on touche un champ */
+            input,
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+        }
     </style>
 </head>
 

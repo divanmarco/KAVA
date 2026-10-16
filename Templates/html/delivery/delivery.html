@@ -13,9 +13,8 @@
             class="form-control form-control-sm w-auto" value="{{ q }}">
     </form>
 </div>
-
 <div class="table-responsive">
-    <table class="table align-middle">
+    <table class="table align-middle table-cards">
         <thead>
             <tr>
                 <th>N°</th>
@@ -32,64 +31,42 @@
         <tbody>
             {% for row in deliveries.items %}
             <tr class="position-relative">
-                <td>{{ row.id_livraison or '-' }}</td>
-                <td>
+                <td data-label="N°" class="mobile-hide">{{ row.id_livraison or '-' }}</td>
+                <td data-label="Commande">
                     <a href="{{ url_for('orders_details', id_commande=row.id_commande) }}"
                         class="stretched-link text-decoration-none text-dark">
                         #{{ row.id_commande }}
                     </a>
                 </td>
-                <td>{{ row.client_name }}</td>
-                <td>{{ row.livreur_name or '-' }}</td>
-                <td>{{ row.adresse_livraison or '-' }}</td>
-                <td>{{ row.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') if row.date_livraison_prevue else '-' }}
-                </td>
-                <td>{{ row.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if row.date_livraison_effective else '-'
-                    }}</td>
-                <td>
+                <td data-label="Client">{{ row.client_name }}</td>
+                <td data-label="Livreur">{{ row.livreur_name or '-' }}</td>
+                <td data-label="Adresse">{{ row.adresse_livraison or '-' }}</td>
+                <td data-label="Date prévue">{{ row.date_livraison_prevue.strftime('%d/%m/%Y %H:%M') if
+                    row.date_livraison_prevue else '-' }}</td>
+                <td data-label="Date effective">{{ row.date_livraison_effective.strftime('%d/%m/%Y %H:%M') if
+                    row.date_livraison_effective else '-' }}</td>
+                <td data-label="Statut">
                     {% if not row.id_livraison %}
                     <span class="badge text-secondary">À planifier</span>
-
                     {% elif row.statut == 'livree' %}
                     <span class="badge text-success">Livrée</span>
-
                     {% else %}
                     <span class="badge text-warning">Planifiée</span>
                     {% endif %}
                 </td>
-                <td class="text-end position-relative" style="z-index: 2;">
+                <td data-label="" class="text-end position-relative" style="z-index: 2;">
                     {% if row.id_livraison %}
                     <a href="{{ url_for('delivery_details_page', id_livraison=row.id_livraison) }}"
-                        class="btn btn-gold">
-                        <i class="bi bi-eye"></i>
-                    </a>
-                    <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
+                        class="btn btn-gold"><i class="bi bi-eye"></i></a>
+                    <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary"><i
+                            class="bi bi-pencil"></i></a>
                     {% if row.statut != 'livree' %}
-                    <a href="{{ url_for('livrer_commande', id_livraison=row.id_livraison) }}" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i>
-                    </a>
+                    <a href="{{ url_for('livrer_commande', id_livraison=row.id_livraison) }}" class="btn btn-success"><i
+                            class="bi bi-check-circle"></i></a>
                     {% endif %}
-                    {% if row.statut != 'livree' %}
-                    <a href="{{ url_for('edit_delivery', id_livraison=row.id_livraison) }}" class="btn btn-secondary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <a href="{{ url_for('livrer_commande', id_livraison=row.id_livraison) }}" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i>
-                    </a>
-                    {% endif %}
-                    <!-- <button type="button" class="btn btn-gold delete-product-btn" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal"
-                        data-item-name="Livraison n° {{ row.id_livraison }} ({{ row.client_name }})"
-                        data-item-label="Supprimer la livraison ?"
-                        data-delete-url="{{ url_for('delete_delivery', id_livraison=row.id_livraison) }}">
-                        <i class="bi bi-trash"></i>
-                    </button> -->
                     {% else %}
-                    <a href="{{ url_for('add_delivery', id_commande=row.id_commande) }}" class="btn btn-gold">
-                        <i class="bi bi-calendar-plus"></i>
-                    </a>
+                    <a href="{{ url_for('add_delivery', id_commande=row.id_commande) }}" class="btn btn-gold"><i
+                            class="bi bi-calendar-plus"></i></a>
                     {% endif %}
                 </td>
             </tr>
@@ -108,15 +85,15 @@
         <ul class="pagination pagination-sm mb-0">
             {% if deliveries.has_prev %}
             <li class="page-item"><a class="page-link"
-                    href="{{ url_for('delivery', page=deliveries.prev_num, q=q) }}">Previous</a></li>
+                    href="{{ url_for('delivery', page=deliveries.prev_num, q=q) }}">Suivant</a></li>
             {% else %}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
             {% endif %}
             {% if deliveries.has_next %}
             <li class="page-item"><a class="page-link"
-                    href="{{ url_for('delivery', page=deliveries.next_num, q=q) }}">Next</a></li>
+                    href="{{ url_for('delivery', page=deliveries.next_num, q=q) }}">Suivant</a></li>
             {% else %}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
             {% endif %}
         </ul>
     </nav>

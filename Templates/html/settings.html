@@ -87,9 +87,9 @@
           <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
             <span>{{ p.name }}</span>
             {% if p.quantite_en_stock == 0 %}
-            <span class="badge bg-danger">Épuisé</span>
+            <span class="badge text-danger">Épuisé</span>
             {% else %}
-            <span class="badge bg-warning text-dark">{{ p.quantite_en_stock }}</span>
+            <span class="badge text-dark">{{ p.quantite_en_stock }}</span>
             {% endif %}
           </li>
           {% endfor %}

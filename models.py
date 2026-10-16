@@ -57,7 +57,14 @@ class User(db.Model, UserMixin):
 
 @login.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    user = User.query.get(int(user_id))
+
+    if user:
+        statut = str(getattr(user.status, 'value', user.status) or '').strip().lower()
+        if statut in ('inactif', 'bloqué', 'bloque'):
+            return None      # Flask-Login le considère comme déconnecté
+
+    return user
    
 
 class Client(db.Model):

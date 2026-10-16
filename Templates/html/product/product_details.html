@@ -11,7 +11,7 @@
   <i class="bi bi-pencil"></i> Modifier
 </a>
 <a class="btn btn-outline-secondary " href="{{ url_for('product') }}">
-  <i class="bi bi-arrow-left"></i> Retour à la liste
+  <i class="bi bi-arrow-left"></i> Retour
 </a>
 {% endblock %}
 
@@ -35,7 +35,7 @@
   <dt class="col-sm-3">Statut</dt>
   <dd class="col-sm-9">
     <span
-      class="{{ 'text-success' if product.status == 'En stock' else 'text-danger' if product.status == 'Épuisé' else 'text-secondary' }}">
+      class=" metric-label {{ 'text-success' if product.status == 'En stock' else 'text-danger' if product.status == 'Épuisé' else 'text-secondary' }}">
       {{ product.status }}
     </span>
   </dd>

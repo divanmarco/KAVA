@@ -48,13 +48,13 @@
                     }}</td>
                 <td>
                     {% if not row.id_livraison %}
-                    <span class="badge bg-secondary">À planifier</span>
+                    <span class="badge text-secondary">À planifier</span>
 
                     {% elif row.statut == 'livree' %}
-                    <span class="badge bg-success">Livrée</span>
+                    <span class="badge text-success">Livrée</span>
 
                     {% else %}
-                    <span class="badge bg-warning text-dark">Planifiée</span>
+                    <span class="badge text-warning">Planifiée</span>
                     {% endif %}
                 </td>
                 <td class="text-end position-relative" style="z-index: 2;">

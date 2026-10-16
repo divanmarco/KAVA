@@ -7,11 +7,11 @@
 {% block page_subtitle %}{{ user.name }}{% endblock %}
 
 {% block heading_actions %}
-<a class="btn btn-secondary" href="{{ url_for('edit_user', id=user.id) }}">
+<a class="btn btn-gold" href="{{ url_for('edit_user', id=user.id) }}">
   <i class="bi bi-pencil"></i> Modifier
 </a>
-<a class="btn btn-outline-secondary" href="{{ url_for('users') }}">
-  <i class="bi bi-arrow-left"></i> Retour à la liste
+<a class="btn btn-secondary" href="{{ url_for('users') }}">
+  <i class="bi bi-arrow-left"></i> Retour
 </a>
 {% endblock %}
 
@@ -41,7 +41,7 @@
   <dt class="col-sm-3">Statut</dt>
   <dd class="col-sm-9">
     <span
-      class="{{ 'text-success' if user.status == 'Actif' else 'text-danger' if user.status == 'Bloqué' else 'text-secondary' }}">
+      class=" metric-label {{ 'text-success' if user.status == 'Actif' else 'text-danger' if user.status == 'Bloqué' else 'text-secondary' }}">
       {{ user.status }}
     </span>
   </dd>

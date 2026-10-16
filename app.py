@@ -13,8 +13,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 import secrets
 from models import Livraison, Commande, Client, User, RoleEnum,Versement,Settings
-from sqlalchemy import func
-from datetime import datetime
+from sqlalchemy import func, desc, cast, Date  
+from datetime import datetime, timedelta, date
 from models import Commentaire
 from models import Rapport_de_Compte
 from constants import MODES_VENTE,SEUIL_ALERTE
@@ -42,12 +42,26 @@ from sqlalchemy import desc
 def milliers(valeur):
     return "{:,}".format(valeur).replace(",", " ")
 
-@app.route('/')
+STATUTS_BLOQUES = ('inactif', 'bloqué', 'bloque')
+
+
+def statut_est_actif(statut):
+    s = str(getattr(statut, 'value', statut) or '').strip().lower()
+    return s not in STATUTS_BLOQUES
+
+
+def compte_actif(user):
+    return statut_est_actif(user.status)
+
+
+def nb_gerants_actifs(exclure_id=None):
+    gerants = User.query.filter(User.role == RoleEnum.GERANT).all()
+    return sum(1 for g in gerants if g.id != exclure_id and compte_actif(g))
+
+
+@app.route("/")
 @login_required
 def index():
-    ca_total = db.session.query(
-        func.coalesce(func.sum(Ligne_Commande.quantite * Ligne_Commande.prix_unitaire), 0)
-    ).scalar()
 
     total_articles = db.session.query(
         func.coalesce(func.sum(Ligne_Commande.quantite), 0)
@@ -57,10 +71,53 @@ def index():
         func.coalesce(func.count(Client.id_client), 0)
     ).scalar()
 
+    ca_total = db.session.query(
+        func.coalesce(func.sum(Vente.montant_attendu), 0)
+    ).scalar()
+
+    jour_str = request.args.get("jour") or date.today().isoformat()
+
+    try:
+        jour_choisi = datetime.strptime(jour_str, "%Y-%m-%d").date()
+    except ValueError:
+        jour_choisi = date.today()
+
+    debut_jour = datetime.combine(jour_choisi, datetime.min.time())
+    fin_jour = debut_jour + timedelta(days=1)
+
+    ca_jour, nb_ventes_jour = db.session.query(
+        func.coalesce(func.sum(Vente.montant_attendu), 0),
+        func.count(Vente.id_vente),
+    ).filter(
+        Vente.date_vente >= debut_jour,
+        Vente.date_vente < fin_jour,
+    ).one()
+
+    jour_col = cast(Vente.date_vente, Date)
+
+    debut_historique = datetime.combine(
+        date.today() - timedelta(days=29),
+        datetime.min.time(),
+    )
+
+    lignes = (
+        db.session.query(
+            jour_col.label("jour"),
+            func.count(Vente.id_vente).label("nb_ventes"),
+            func.sum(Vente.montant_attendu).label("ca"),
+        )
+        .filter(Vente.date_vente >= debut_historique)
+        .group_by(jour_col)
+        .order_by(jour_col.desc())
+        .all()
+    )
+
+    total = sum((ligne.ca or 0) for ligne in lignes)
+
     commandes_recentes = (
         db.session.query(
             Commande.id_commande,
-            Client.name.label('client_name'),
+            Client.name.label("client_name"),
             Vente.montant_attendu,
             Vente.montant_percue,
             Vente.statut,
@@ -80,7 +137,7 @@ def index():
         .join(Ligne_Commande, Ligne_Commande.id_produit == Produits.id_produit)
         .group_by(Produits.id_produit, Produits.name)
         .order_by(func.sum(Ligne_Commande.quantite).desc())
-        .limit(6)
+        .limit(7)
         .all()
     )
 
@@ -93,15 +150,71 @@ def index():
         for nom, qte in top_produits
     ]
 
+    meilleur_client = (
+        db.session.query(
+            Client.name,
+            func.sum(Vente.montant_attendu).label("total_achats"),
+        )
+        .join(Commande, Commande.id_client == Client.id_client)
+        .join(Vente, Vente.id_commande == Commande.id_commande)
+        .group_by(Client.id_client, Client.name)
+        .order_by(func.sum(Vente.montant_attendu).desc())
+        .first()
+    )
+
+    client_plus_commandes = (
+        db.session.query(
+            Client.name,
+            func.count(Commande.id_commande).label("nb_commandes"),
+        )
+        .join(Commande, Commande.id_client == Client.id_client)
+        .group_by(Client.id_client, Client.name)
+        .order_by(func.count(Commande.id_commande).desc())
+        .first()
+    )
+
+    plus_grosse_commande = (
+        db.session.query(
+            Client.name,
+            Commande.id_commande,
+            Vente.montant_attendu.label("montant"),
+        )
+        .join(Commande, Commande.id_client == Client.id_client)
+        .join(Vente, Vente.id_commande == Commande.id_commande)
+        .order_by(Vente.montant_attendu.desc())
+        .first()
+    )
+
+    articles_jour = (
+        db.session.query(func.coalesce(func.sum(Ligne_Commande.quantite), 0))
+        .select_from(Ligne_Commande)
+        .join(Vente, Vente.id_commande == Ligne_Commande.id_commande)
+        .filter(
+            Vente.date_vente >= debut_jour,
+            Vente.date_vente < fin_jour,
+        )
+        .scalar()
+    )
+
     return render_template(
-        'html/index.html',
-        ca_total=float(ca_total),
+        "html/index.html",
+        ca_total=int(ca_total),
+        ca_jour=int(ca_jour),
+        nb_ventes_jour=nb_ventes_jour,
+        jour_choisi=jour_choisi,
+        lignes=lignes,
+        total=int(total),
         total_articles=int(total_articles),
         total_clients=int(total_clients),
         commandes_recentes=commandes_recentes,
         produits_alerte=get_produits_sous_seuil(),
         ratios_produits=ratios_produits,
+        meilleur_client=meilleur_client,
+        client_plus_commandes=client_plus_commandes,
+        plus_grosse_commande=plus_grosse_commande,
+        articles_jour=int(articles_jour),
     )
+
 
 def get_stock_stats():
     stock_rows = (
@@ -142,12 +255,31 @@ def get_stock_stats():
 
 
 def get_produits_sous_seuil():
+    params = db.session.get(Settings, 1)
+    seuil = params.seuil_alerte if params and params.seuil_alerte else SEUIL_ALERTE
     return (
         Produits.query
-        .filter(Produits.quantite_en_stock <= SEUIL_ALERTE)
+        .filter(Produits.quantite_en_stock <= seuil)
         .order_by(Produits.quantite_en_stock.asc())
         .all()
     )
+
+
+
+
+def verifier_mot_de_passe(hash_stocke, mdp_saisi):
+    if not hash_stocke or not mdp_saisi:
+        return False
+
+    # Nouveaux comptes : hash bcrypt (commence par $2)
+    if hash_stocke.startswith("$2"):
+        return bcrypt.check_password_hash(hash_stocke, mdp_saisi)
+
+    # Anciens comptes : hash werkzeug
+    try:
+        return check_password_hash(hash_stocke, mdp_saisi)
+    except ValueError:
+        return False
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -155,15 +287,25 @@ def login():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-        name = request.form.get('name')
-        password = request.form.get('password')
+        name = (request.form.get('name') or '').strip()
+        password = request.form.get('password') or ''
 
         user = User.query.filter_by(name=name).first()
-        if not user or not check_password_hash(user.mot_de_passe, password):
+
+        # Statut en minuscules (marche que ce soit du texte ou un Enum)
+        statut = ''
+        if user:
+            statut = str(getattr(user.status, 'value', user.status) or '').strip().lower()
+
+        if not user or not verifier_mot_de_passe(user.mot_de_passe, password):
             flash("Nom d'utilisateur ou mot de passe incorrect.", "danger")
 
-        elif user.role.value  != 'Gérant':
+        elif not compte_actif(user):
+            flash("Ce compte est inactif ou bloqué. Contactez le gérant.", "danger")
+
+        elif user.role.value != 'Gérant':
             flash("Seul le Gérant peut se connecter pour l'instant.", "warning")
+
         else:
             login_user(user)
             flash(f"Bienvenue {user.name} !", "info")
@@ -179,6 +321,7 @@ def logout():
     session.pop('_flashes', None) 
     flash("Vous avez été déconnecté avec succès.", "info")
     return redirect(url_for('login'))
+
 
 @app.route("/settings.html", methods=["GET", "POST"])
 @login_required
@@ -228,9 +371,7 @@ def settings():
         elif change_pw and new_pw != confirm_pw:                     # NOUVEAU
             flash("Les nouveaux mots de passe ne correspondent pas.", "danger")
 
-        elif change_pw and not check_password_hash(                  # NOUVEAU
-            current_user.mot_de_passe, old_pw
-        ):
+        elif change_pw and not verifier_mot_de_passe(current_user.mot_de_passe, old_pw):
             flash("Le mot de passe actuel est incorrect.", "danger")
 
         else:
@@ -239,7 +380,7 @@ def settings():
             current_user.telephone = user_tel if user_tel else None
 
             if change_pw:                                            # NOUVEAU
-                current_user.mot_de_passe = generate_password_hash(new_pw)
+                current_user.mot_de_passe = bcrypt.generate_password_hash(new_pw).decode("utf-8")
 
             params.nom_entreprise = f.get("nom_entreprise", "").strip()
             params.telephone = f.get("telephone", "").strip()
@@ -251,6 +392,8 @@ def settings():
             flash("Paramètres enregistrés avec succès.", "success")
 
         return redirect(url_for("settings"))
+
+    
     faibles = Produits.query.filter(Produits.quantite_en_stock < params.seuil_alerte)
     nb_faibles = faibles.count()
     produits_faibles = (
@@ -266,10 +409,32 @@ def settings():
         nb_faibles=nb_faibles,
     )
 
-
-@app.route("/forgot-password.html", methods=["GET", "POST"])
+@app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
-    return render_template("html/forgot-password.html")
+    if request.method == 'POST':
+        name = (request.form.get('name') or '').strip()
+        email = (request.form.get('email') or '').strip()
+
+        user = User.query.filter(
+            func.lower(func.trim(User.name)) == name.lower(),
+            func.lower(func.trim(User.email)) == email.lower(),
+        ).first()
+
+        if not user:
+            flash("Informations incorrectes. Vérifiez le nom et l'email.", "danger")
+            return render_template('html/forgot_password.html')
+
+        if not compte_actif(user):
+            flash("Ce compte est inactif ou bloqué. Contactez le gérant.", "danger")
+            return render_template('html/forgot_password.html')
+
+        nouveau = secrets.token_urlsafe(8)
+        user.mot_de_passe = bcrypt.generate_password_hash(nouveau).decode('utf-8')
+        db.session.commit()
+
+        return render_template('html/forgot_password.html',mdp_genere=nouveau, nom_reset=user.name)
+
+    return render_template('html/forgot_password.html')
 
 @app.route("/profile.html")
 @login_required
@@ -297,16 +462,21 @@ def update_profile():
     return redirect(url_for("settings"))
 
 # Users Management Routes
+
+ 
+
+
 @app.route("/add-user.html", methods=["GET", "POST"])
+@login_required
 def add_user():
     if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        telephone = request.form.get("telephone")
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get("email") or "").strip()
+        telephone = (request.form.get("telephone") or "").strip()
         ville = request.form.get("ville")
         quartier = request.form.get("quartier")
         role = request.form.get("role")
-       
+        status = request.form.get("status")
 
         if not name:
             flash("Le nom est obligatoire.", "danger")
@@ -317,23 +487,23 @@ def add_user():
             return render_template("html/users/add-user.html")
 
         if not telephone.isdigit() or len(telephone) != 9:
-            flash("Le numéro de téléphone est obligatoire.", "danger")
+            flash("Le téléphone doit contenir exactement 9 chiffres.", "danger")
             return render_template("html/users/add-user.html")
 
         if not quartier:
             flash("Le quartier de résidence est obligatoire.", "danger")
             return render_template("html/users/add-user.html")
 
-        mot_de_passe_clair = User.generer_mot_de_passe()
-        mot_de_passe_hash = generate_password_hash(mot_de_passe_clair)
+        if not status:
+            flash("Le statut est obligatoire.", "danger")
+            return render_template("html/users/add-user.html")
 
+        if User.query.filter(User.name.ilike(name)).first():
+            flash("Cet utilisateur existe déjà !", "danger")
+            return render_template("html/users/add-user.html")
 
-        utilisateur_existant = User.query.filter(
-        User.name.ilike(name)).first()
-        
-        if  utilisateur_existant:
-            flash ("Cet Utilisateur existe déjà!", "danger")
-            return redirect(url_for('add-user'))
+        # Un mot de passe NEUF pour chaque utilisateur, généré ici
+        mdp_clair = secrets.token_urlsafe(8)
 
         nouvel_utilisateur = User(
             name=name,
@@ -342,9 +512,9 @@ def add_user():
             telephone=telephone,
             ville=ville,
             quartier=quartier,
-            mot_de_passe=mot_de_passe_hash,
+            status=status,
+            mot_de_passe=bcrypt.generate_password_hash(mdp_clair).decode("utf-8"),
             role=RoleEnum(role),
-           
         )
 
         try:
@@ -355,40 +525,88 @@ def add_user():
             flash("Cet email est déjà utilisé par un autre utilisateur.", "danger")
             return render_template("html/users/add-user.html")
 
-        flash(f"Utilisateur créé avec succès")
-        return redirect(url_for("users"))
+        # On réaffiche la page avec les 2 variables qui déclenchent le pop-up
+        return render_template(
+            "html/users/add-user.html",
+            mdp_genere=mdp_clair,
+            nom_cree=name,
+        )
 
     return render_template("html/users/add-user.html")
 
 
 @app.route("/users/edit-user.html/<int:id>", methods=["GET", "POST"])
+@login_required
 def edit_user(id):
     user = User.query.get_or_404(id)
+
     if request.method == "POST":
+        nouveau_role = RoleEnum(request.form.get("role"))
+        nouveau_statut = request.form.get("status")
+
+        # Contrôle 1 : on ne se désactive pas soi-même et on ne quitte pas le rôle Gérant
+        if user.id == current_user.id and (
+            not statut_est_actif(nouveau_statut) or nouveau_role != RoleEnum.GERANT
+        ):
+            flash("Vous ne pouvez pas désactiver votre propre compte ni quitter le rôle Gérant.", "danger")
+            return render_template("html/users/edit-user.html", user=user)
+
+        # Contrôle 2 : on ne retire pas le dernier gérant actif
+        etait_gerant_actif = user.role == RoleEnum.GERANT and compte_actif(user)
+        sera_gerant_actif = nouveau_role == RoleEnum.GERANT and statut_est_actif(nouveau_statut)
+
+        if etait_gerant_actif and not sera_gerant_actif and nb_gerants_actifs(exclure_id=user.id) == 0:
+            flash("Impossible : c'est le dernier gérant actif.", "danger")
+            return render_template("html/users/edit-user.html", user=user)
+
+        # Les contrôles sont passés : on peut modifier
         user.name = request.form.get("name")
         user.email = request.form.get("email")
         user.telephone = request.form.get("telephone")
         user.ville = request.form.get("ville")
         user.quartier = request.form.get("quartier")
-        user.role = RoleEnum(request.form.get("role"))
-        user.status = request.form.get("status")
+        user.role = nouveau_role
+        user.status = nouveau_statut
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Cet email est déjà utilisé par un autre utilisateur.", "danger")
+            return render_template("html/users/edit-user.html", user=user)
+
+        flash("Utilisateur modifié.", "success")
         return redirect(url_for("users"))
-    return render_template("html/users/edit-user.html", user=user)
 
+    return render_template("html/users/edit-user.html", user=user)
 @app.route("/user-details/<int:id>")
 def user_details(id):
     user = User.query.get_or_404(id)
     return render_template("html/users/user-details.html", user=user)
 
 @app.route("/delete-user/<int:id>", methods=["POST"])
+@login_required
 def delete_user(id):
     user = User.query.get_or_404(id)
-    if user:
+
+    if user.id == current_user.id:
+        flash("Vous ne pouvez pas supprimer votre propre compte.", "danger")
+        return redirect(url_for("users"))
+
+    if user.role == RoleEnum.GERANT and compte_actif(user) and nb_gerants_actifs(exclure_id=user.id) == 0:
+        flash("Impossible : c'est le dernier gérant actif.", "danger")
+        return redirect(url_for("users"))
+
+    try:
         db.session.delete(user)
         db.session.commit()
+        flash("Utilisateur supprimé.", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash("Cet utilisateur a des ventes ou livraisons liées : passez-le en « Inactif » au lieu de le supprimer.", "warning")
+
     return redirect(url_for("users"))
+
 
 @app.route('/users')
 def users():    
@@ -1215,12 +1433,11 @@ def livrer_commande(id_livraison):
     flash("Livraison effectuée avec succès.", "success")
 
     return redirect(url_for('delivery'))
-
-
 @app.route("/change-password.html", methods=["GET", "POST"])
 @login_required
 def change_password_route():
-    back = request.referrer or url_for("dashboard")
+    back = request.referrer or url_for("index")
+
     if request.method == "POST":
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
@@ -1234,12 +1451,12 @@ def change_password_route():
             flash("Les nouveaux mots de passe ne correspondent pas.", "danger")
             return redirect(back)
 
-        user = User.query.get(current_user.id)
-        if not user or not check_password_hash(user.mot_de_passe, old_password):
+        user = db.session.get(User, current_user.id)
+        if not user or not verifier_mot_de_passe(user.mot_de_passe, old_password):
             flash("Le mot de passe actuel est incorrect.", "danger")
             return redirect(back)
 
-        user.mot_de_passe = generate_password_hash(new_password)
+        user.mot_de_passe = bcrypt.generate_password_hash(new_password).decode("utf-8")
         db.session.commit()
         flash("Le mot de passe a été modifié avec succès.", "success")
         return redirect(back)

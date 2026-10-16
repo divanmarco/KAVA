@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8">
@@ -25,20 +25,11 @@
       </div>
       <nav class="sidebar-nav">
         <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2"
-            viewBox="0 0 16 16">
-            <path
-              d="M6 1H1v14h5zm9 0h-5v5h5zm0 9v5h-5v-5zM0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 １-１-１z" />
-          </svg>
+          <i class="bi bi-grid-1x2" aria-hidden="true"></i>
           <span class="text-sidebar">Vue d'ensemble</span>
         </a>
         <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}" href="{{ url_for('users') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle"
-            viewBox="0 0 16 16">
-            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-            <path fill-rule="evenodd"
-              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.7571.225 5.468 2.37A7 7 0 0 0 8 1z" />
-          </svg>
+          <i class="bi bi-person-circle" aria-hidden="true"></i>
           <span>Utilisateurs</span>
         </a>
         <a class="nav-link {% if request.endpoint == 'product' %}active{% endif %}" href="{{ url_for('product') }}">
@@ -58,11 +49,7 @@
           <span>Commandes & Ventes</span>
         </a>
         <a class="nav-link {% if request.endpoint == 'customers' %}active{% endif %}" href="{{ url_for('customers') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill"
-            viewBox="0 0 16 16">
-            <path
-              d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1_0_0-5_2.5_2.5_0_0_0_0_5" />
-          </svg>
+          <i class="bi bi-people-fill" aria-hidden="true"></i>
           <span>Clients</span>
         </a>
         <a class="nav-link {% if request.endpoint == 'charts' %}active{% endif %}" href="{{ url_for('charts') }}">
@@ -118,6 +105,10 @@
     <div class="admin-main">
       <nav class="navbar admin-navbar navbar-expand bg-white">
         <div class="container-fluid px-3 px-lg-4">
+          <button class="btn btn-outline-secondary d-lg-none me-2" type="button" data-sidebar-toggle
+            aria-label="Ouvrir le menu">
+            <i class="bi bi-list fs-5" aria-hidden="true"></i>
+          </button>
           <h1 class="h3 mb-1">KAVA</h1>
           <div class="navbar-actions ms-auto">
             <a class="profile-button" href="{{ url_for('settings') }}">
@@ -196,6 +187,25 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var body = document.body;
+
+      document.querySelectorAll('[data-sidebar-toggle]').forEach(function (b) {
+        b.addEventListener('click', function () { body.classList.toggle('sidebar-open'); });
+      });
+
+      // Clic sur le fond sombre ou sur un lien du menu : on referme
+      document.querySelectorAll('[data-sidebar-close], #adminSidebar .nav-link').forEach(function (el) {
+        el.addEventListener('click', function () { body.classList.remove('sidebar-open'); });
+      });
+
+      // Retour à un grand écran : on nettoie
+      window.addEventListener('resize', function () {
+        if (window.innerWidth >= 992) { body.classList.remove('sidebar-open'); }
+      });
+    });
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 

@@ -57,13 +57,13 @@
                 <p class="mb-0"><strong>Remboursement :</strong> {{ remboursement }}</p>
                 <p class="mb-0"><strong>Statut :</strong>
                     {% if vente.statut == 'payee' %}
-                    <span class="badge bg-success">Comptant</span>
+                    <span class="badge text-success">Comptant</span>
                     {% elif vente.statut == 'partielle' %}
-                    <span class="badge bg-warning text-dark">Partielle</span>
+                    <span class="badge text-warning">Partielle</span>
                     {% elif vente.statut == 'impayee' %}
-                    <span class="badge bg-danger">Crédit</span>
+                    <span class="badge text-danger">Crédit</span>
                     {% else %}
-                    <span class="badge bg-secondary">-</span>
+                    <span class="badge text-secondary">-</span>
                     {% endif %}
                 </p>
                 <p class="mb-0"><strong>Action à mener :</strong>

@@ -2,76 +2,79 @@
 
 {% block title %}Vue d'ensemble{% endblock %}
 
-{% block page_icon %}
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2"
-  viewBox="0 0 16 16">
-  <path
-    d="M6 1H1v14h5zm9 0h-5v5h5zm0 9v5h-5v-5zM0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z" />
-</svg>
-{% endblock %}
+{% block page_icon %}<i class="bi bi-grid-1x2" aria-hidden="true"></i>{% endblock %}
 
 {% block page_title %}Vue d'ensemble{% endblock %}
 {% block page_subtitle %}Aperçu en temps réel de votre activité.{% endblock %}
 
+{% block heading_actions %}
+<form method="GET" class="d-flex gap-2">
+  <input type="date" name="jour" value="{{ jour_choisi.isoformat() }}" class="form-control"
+    onchange="this.form.submit()">
+</form>
+{% endblock %}
+
 {% block content %}
+
 <section class="row g-3 mt-1" aria-label="Dashboard metrics">
+
   <div class="col-12 col-sm-6 col-xl-3">
-    <article class="metric-card">
+    <article class="metric-card metric-primary h-100">
       <div class="metric-top">
-        <span class="metric-label">CHIFFRE D'AFFAIRES</span>
-        <span class="metric-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cash-stack"
-            viewBox="0 0 16 16">
-            <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
-            <path
-              d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2z" />
-          </svg>
-        </span>
+        <span class="metric-label">CHIFFRE D'AFFAIRES DU {{ jour_choisi.strftime('%d/%m/%Y') }}</span>
+        <span class="metric-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
       </div>
-      <div class="devise metric-value">{{ ca_total | milliers }}<span class="devise1">FCFA</span></div>
+      <div class="devise metric-value">{{ ca_jour | milliers }}<span class="devise1">FCFA</span></div>
       <div class="metric-meta">
+        {{ nb_ventes_jour }} vente(s)<br>
+        Cumul total : {{ ca_total | milliers }} FCFA
       </div>
     </article>
   </div>
 
   <div class="col-12 col-sm-6 col-xl-3">
-    <article class="metric-card metric-success">
+    <article class="metric-card metric-success h-100">
       <div class="metric-top">
         <span class="metric-label">NOMBRE DE PRODUITS VENDUS</span>
-        <span class="metric-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart"
-            viewBox="0 0 16 16">
-            <path
-              d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
-          </svg>
-        </span>
+        <span class="metric-icon"><i class="bi bi-cart" aria-hidden="true"></i></span>
       </div>
       <div class="metric-value">{{ total_articles }}</div>
+      <div class="metric-meta">
+        <i class="bi bi-calendar-day" aria-hidden="true"></i>
+        {{ articles_jour }} article(s) le {{ jour_choisi.strftime('%d/%m/%Y') }}
+        {% if ratios_produits %}
+        <br>
+        <i class="bi bi-trophy" aria-hidden="true"></i>
+        Plus vendu : <strong>{{ ratios_produits[0].nom }}</strong>
+        ({{ ratios_produits[0].quantite }})
+        {% endif %}
+      </div>
     </article>
   </div>
-
-
-  <div class="col-12 col-xl-3">
-    <article class="metric-card metric-danger">
+  
+  <div class="col-12 col-sm-6 col-xl-3">
+    <article class="metric-card metric-danger h-100">
       <div class="metric-top">
-        <span class="metric-label text-danger">SEUIL ALERTE</span>
-        <span class="metric-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-            class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
-            <path
-              d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z" />
-            <path
-              d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
-          </svg>
-        </span>
+        <span class="metric-label text-danger">PRODUITS SOUS LE SEUIL</span>
+        <span class="metric-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
       </div>
-      <div class="metric-value text-danger">{{ produits_alerte|length }}
-      </div>
+      <div class="metric-value text-danger">{{ produits_alerte | length }}</div>
       <div class="metric-meta">
         {% if produits_alerte %}
-        Plus critique : {{ produits_alerte[0].name }}
+        <ul class="list-unstyled mb-0">
+          {% for p in produits_alerte[:3] %}
+          <li class="d-flex justify-content-between align-items-center gap-2">
+            <span>{{ p.name }}</span>
+            {% if p.quantite_en_stock == 0 %}
+            <span class="badge text-danger">Épuisé</span>
+            {% else %}
+            <!-- <span class="metric-label text-dark">{{ p.quantite_en_stock }}</span> -->
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
         {% else %}
-        Aucune alerte
+        Aucun produit sous le seuil
         {% endif %}
       </div>
     </article>
@@ -85,12 +88,25 @@
       </div>
       <div class="metric-value">{{ total_clients }}</div>
       <div class="metric-meta">
+        {% if client_plus_commandes %}
+        Plus de commandes : <strong>{{ client_plus_commandes.name }}</strong>
+        ({{ client_plus_commandes.nb_commandes }})
+        {% else %}
+        Aucune commande pour le moment
+        {% endif %}
+        <br>
+        {% if plus_grosse_commande %}
+        <i class="bi bi-star" aria-hidden="true"></i>
+        Plus grosse commande : <strong>{{ plus_grosse_commande.name }}</strong>
+        ({{ plus_grosse_commande.montant | int | milliers }} FCFA)
+        {% endif %}
       </div>
     </article>
   </div>
-</section>
-<section class="row g-3 mt-1" aria-label="Produits et commandes">
 
+</section>
+
+<section class="row g-3 mt-1" aria-label="Produits et commandes">
   <div class="col-12 col-xl-6">
     <div class="panel h-100">
       <div class="card-header py-3">
@@ -103,9 +119,8 @@
             <span>{{ p.nom }} <small class="text-muted">({{ p.quantite }} vendus)</small></span>
             <strong>{{ p.ratio }}%</strong>
           </div>
-          <div class="progress" style="height: 40px;">
-            <div class="progress-bar bg-success"style="width: {{ p['ratio'] }}%;"></div>
-          </div>
+          <progress class="w-100" value="{{ p['ratio'] }}" max="100" aria-label="{{ p.nom }} : {{ p['ratio'] }}%">{{
+            p['ratio'] }}%</progress>
         </div>
         {% else %}
         <p class="text-muted mb-0">Aucune vente enregistrée pour le moment.</p>
@@ -152,10 +167,11 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% if row.montant_attendu is not none %}
-                  {{ "%.2f"|format(row.montant_attendu) }} <span class="devise">FCFA</span>
+                  {% if row.montant_percue is not none %}
+                  {{ row.montant_percue | milliers }}
+                  <span class="devise">FCFA</span>
                   {% else %}
-                  —
+                  0 FCFA
                   {% endif %}
                 </td>
               </tr>
